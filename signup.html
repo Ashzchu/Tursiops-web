@@ -137,6 +137,7 @@
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        alertBox.textContent = '';
         alertBox.style.display = 'none';
 
         const name = document.getElementById('signupName').value.trim();
@@ -144,20 +145,28 @@
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('signupConfirmPassword').value;
 
-        if (!email || !password) {
-          alertBox.textContent = 'Please fill in required fields.';
+        // Client-side validation
+        if (!email || !email.includes('@')) {
+          alertBox.textContent = 'Please enter a valid email address.';
           alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
           return;
         }
-
+        if (!password || password.length < 8) {
+          alertBox.textContent = 'Password must be at least 8 characters.';
+          alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
+          return;
+        }
         if (password !== confirmPassword) {
           alertBox.textContent = 'Passwords do not match.';
           alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
           return;
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'CREATING ACCOUNT...';
+        document.getElementById('signUpSubmitText').textContent = 'CREATING ACCOUNT...';
 
         try {
           const body = { name, email, password, confirmPassword };
@@ -172,15 +181,17 @@
           const data = await res.json().catch(() => ({}));
 
           if (!res.ok) {
-            throw new Error(data.message || 'Signup failed');
+            throw new Error(data.message || 'Account creation failed. Please try again.');
           }
 
           if (data.token) {
+            // TODO: move to httpOnly cookie in production
             localStorage.setItem('tursiops_token', data.token);
           }
 
           alertBox.textContent = '✓ Account created! Returning to VS Code...';
           alertBox.className = 'auth-alert-box success';
+          alertBox.style.display = '';
 
           if (data.redirect_url) {
             window.location.href = data.redirect_url;
@@ -188,11 +199,12 @@
             setTimeout(() => { window.location.href = '/landing'; }, 1000);
           }
         } catch (err) {
-          alertBox.textContent = err.message || 'Error processing request.';
+          alertBox.textContent = err.message || 'Sign up failed. Please try again.';
           alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
         } finally {
           btnSubmit.disabled = false;
-          btnSubmit.textContent = 'CREATE ACCOUNT & RETURN TO VS CODE';
+          document.getElementById('signUpSubmitText').textContent = 'CREATE ACCOUNT & RETURN TO VS CODE';
         }
       });
     });

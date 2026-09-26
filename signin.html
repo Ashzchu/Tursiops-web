@@ -112,13 +112,13 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const redirectUri = urlParams.get('redirect_uri');
+      const redirect = urlParams.get('redirect');
       const deepLinkBanner = document.getElementById('deepLinkBanner');
       const deepLinkTarget = document.getElementById('deepLinkTarget');
 
-      if (redirectUri && deepLinkBanner && deepLinkTarget) {
+      if (redirect && deepLinkBanner && deepLinkTarget) {
         deepLinkBanner.style.display = 'block';
-        deepLinkTarget.textContent = redirectUri;
+        deepLinkTarget.textContent = redirect;
       }
 
       const form = document.getElementById('standaloneAuthForm');
@@ -127,25 +127,33 @@
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        alertBox.textContent = '';
         alertBox.style.display = 'none';
 
         const email = document.getElementById('signinEmail').value.trim();
         const password = document.getElementById('signinPassword').value;
 
-        if (!email || !password) {
-          alertBox.textContent = 'Please fill in all fields.';
+        // Client-side validation
+        if (!email || !email.includes('@')) {
+          alertBox.textContent = 'Please enter a valid email address.';
           alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
+          return;
+        }
+        if (!password || password.length < 8) {
+          alertBox.textContent = 'Password must be at least 8 characters.';
+          alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
           return;
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'AUTHORIZING...';
+        document.getElementById('signInSubmitText').textContent = 'AUTHORIZING...';
 
         try {
           const body = { email, password };
-          if (redirectUri) body.redirect_uri = redirectUri;
-
-          const res = await fetch('/login', {
+          const fetchUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
+          const res = await fetch(fetchUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -154,15 +162,17 @@
           const data = await res.json().catch(() => ({}));
 
           if (!res.ok) {
-            throw new Error(data.message || 'Invalid credentials');
+            throw new Error(data.message || 'Invalid email or password.');
           }
 
           if (data.token) {
+            // TODO: move to httpOnly cookie in production
             localStorage.setItem('tursiops_token', data.token);
           }
 
           alertBox.textContent = '✓ Authorized! Returning to VS Code...';
           alertBox.className = 'auth-alert-box success';
+          alertBox.style.display = '';
 
           if (data.redirect_url) {
             window.location.href = data.redirect_url;
@@ -170,11 +180,12 @@
             setTimeout(() => { window.location.href = '/landing'; }, 1000);
           }
         } catch (err) {
-          alertBox.textContent = err.message || 'Authentication error';
+          alertBox.textContent = err.message || 'Sign in failed. Check your email and password.';
           alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = '';
         } finally {
           btnSubmit.disabled = false;
-          btnSubmit.textContent = 'AUTHORIZE & RETURN TO VS CODE';
+          document.getElementById('signInSubmitText').textContent = 'AUTHORIZE & RETURN TO VS CODE';
         }
       });
     });

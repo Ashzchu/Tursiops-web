@@ -11,7 +11,8 @@ const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url) {
-  console.warn('[WARN] TURSO_DATABASE_URL is not set in environment variables.');
+  // Allow local fallback in dev; Vercel startup guard in api/index.js catches missing vars in production
+  console.warn('[WARN] TURSO_DATABASE_URL is not set — falling back to local SQLite file (local.db). Set this variable in production.');
 }
 
 /**

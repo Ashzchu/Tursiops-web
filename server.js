@@ -4,6 +4,8 @@
  */
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -15,16 +17,52 @@ import { findUserById } from './server/db.js';
 
 dotenv.config();
 
+// Fail fast if required environment variables are missing
+const _required = ['TURSO_DATABASE_URL', 'TURSO_AUTH_TOKEN', 'JWT_SECRET'];
+_required.forEach(key => {
+  if (!process.env[key]) throw new Error(`Missing required environment variable: ${key}`);
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Security headers
+app.use(helmet());
+
+// CORS — restrict to known origins
+const allowedOrigins = [
+  'https://tursiops-web.vercel.app',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (server-to-server, curl, VS Code extension)
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
+
+// Rate limiter for auth endpoints — 20 requests per 15 minutes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts, please try again later.' },
+});
+app.use('/api/auth', authLimiter);
+app.use('/login', authLimiter);
+app.use('/signup', authLimiter);
+
+// Body parsing — 10 kb limit to prevent oversized payloads
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Serve frontend static landing page files (index.html, style.css, app.js)
 app.use(express.static(__dirname));
@@ -82,7 +120,7 @@ app.get('/api/me', async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid Token', message: err.message });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 });
 
@@ -98,14 +136,20 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Centralized Error Handler
+// 404 handler — must come after all routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Centralized Error Handler — never leak internal error messages to the client
 app.use((err, req, res, next) => {
   console.error('[SERVER ERROR]', err);
   const status = err.status || 500;
-  res.status(status).json({
-    error: err.name || 'Internal Server Error',
-    message: err.message || 'An unexpected error occurred',
-  });
+  // Only expose message for known, explicitly-set client errors (4xx)
+  if (status < 500) {
+    return res.status(status).json({ error: err.message || 'Bad request' });
+  }
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // Start Server and Initialize Database (local dev only)

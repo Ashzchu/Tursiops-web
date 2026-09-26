@@ -83,19 +83,19 @@ router.post('/signup', async (req, res, next) => {
       });
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       if (req.accepts('html') && !req.xhr && !req.is('json')) {
         return res.status(400).send(renderAuthPage({
           mode: 'signup',
           redirectUri,
-          error: 'Password must be at least 6 characters long.',
+          error: 'Password must be at least 8 characters long.',
           name: name || '',
           email,
         }));
       }
       return res.status(400).json({
         error: 'Bad Request',
-        message: 'Password must be at least 6 characters long.',
+        message: 'Password must be at least 8 characters long.',
       });
     }
 
