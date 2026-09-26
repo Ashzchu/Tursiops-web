@@ -225,7 +225,14 @@ router.post('/login', async (req, res, next) => {
       return res.redirect(302, callbackUrl);
     }
 
-    // Fallback: Standard Web Session Response
+    // If the request came from the VS Code extension, redirect back to it
+    if (req.query.redirect === 'vscode') {
+      return res.redirect(
+        `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${encodeURIComponent(user.email)}`
+      );
+    }
+
+    // Normal web/API response
     return res.status(200).json({
       success: true,
       message: 'Authenticated successfully',
