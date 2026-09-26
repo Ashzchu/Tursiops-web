@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TURSIOPS — Persistent Coding Memory for AI Sessions</title>
-  <meta name="description" content="File-specific context and directives across AI coding sessions. Maintain persistent architectural memory across Claude Code, Cursor, Copilot, and CLI agents.">
-  <meta name="keywords" content="tursiops, persistent coding memory, AI coding directives, context preservation, cursor rules, claude code, developer tools">
+  <title>TURSIOPS — Persistent Coding Memory | Memory That Never Sinks</title>
+  <meta name="description" content="File-specific context and directives across AI coding sessions. Maintain persistent architectural rules across Claude Code, Cursor, Copilot, and CLI agents. Featuring live ASCII ocean simulation.">
+  <meta name="keywords" content="tursiops, persistent coding memory, AI coding directives, ascii art, cline alternative, cursor rules, claude code, developer tools">
   <meta name="author" content="Ashzchu">
   <meta property="og:title" content="TURSIOPS — Persistent Coding Memory">
-  <meta property="og:description" content="File-specific context and directives across AI coding sessions.">
+  <meta property="og:description" content="File-specific context and directives across AI coding sessions. Memory that never sinks.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://github.com/Ashzchu/Tursiops-web">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-theme">
   <!-- Ambient background glow elements -->
   <div class="ambient-glow glow-top"></div>
   <div class="ambient-glow glow-center"></div>
+  <div class="ambient-glow glow-bottom"></div>
 
   <!-- Top Global Navigation Bar -->
   <header class="site-header">
@@ -33,11 +34,12 @@
       </div>
 
       <nav class="nav-links">
+        <a href="#ascii-hero" class="nav-link">ASCII Ocean</a>
         <a href="#features" class="nav-link">Features</a>
-        <a href="#demo" class="nav-link">Interactive IDE</a>
+        <a href="#extension" class="nav-link">Extension UI</a>
+        <a href="#demo" class="nav-link">Memory Guard</a>
         <a href="#terminal" class="nav-link">CLI Simulator</a>
         <a href="#architecture" class="nav-link">Architecture</a>
-        <a href="#docs" class="nav-link">Documentation</a>
       </nav>
 
       <div class="header-actions">
@@ -53,146 +55,380 @@
     </div>
   </header>
 
-  <!-- Hero Section: Featuring the exact minimalistic IDE layout from the prompt image -->
   <main>
+    <!-- HERO SECTION: Modern Developer Landing Page with Live ASCII Ocean & Diving Dolphin -->
     <section class="hero-section" id="hero">
       <div class="hero-container">
         
-        <!-- The Core IDE Frame Matching the User's Image -->
-        <div class="ide-frame" id="ideHeroCard">
-          
-          <!-- Top Window Controls Bar -->
-          <div class="ide-titlebar">
+        <!-- Announcement Pill -->
+        <div class="hero-announcement">
+          <span class="hero-pill-badge">NEW</span>
+          <span class="hero-pill-text">Tursiops v1.2.0 released &bull; Cross-Agent Directives Engine</span>
+          <a href="#terminal" class="hero-pill-link">Try CLI &rarr;</a>
+        </div>
+
+        <!-- Main Headline -->
+        <h1 class="main-headline">
+          Persistent Coding Memory.<br>
+          <span class="gradient-text">Never Sinks.</span>
+        </h1>
+
+        <!-- Subheading -->
+        <p class="main-subheading">
+          File-specific context and directives across AI coding sessions. Maintain architectural rules, schema invariants, and team conventions across Claude Code, Cursor, Copilot, and CLI agents.
+        </p>
+
+        <!-- Primary Hero Actions -->
+        <div class="hero-cta-group">
+          <a href="#terminal" class="btn btn-primary btn-large">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>Install CLI</span>
+          </a>
+          <a href="#extension" class="btn btn-secondary btn-large">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Explore Extension UI</span>
+          </a>
+          <a href="https://github.com/Ashzchu/Tursiops-web" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-large">
+            <span>View GitHub</span>
+            <span class="arrow-glyph">&rarr;</span>
+          </a>
+        </div>
+
+        <!-- Quick-copy CLI command -->
+        <div class="cli-quickstart">
+          <span class="cli-prompt">$</span>
+          <code class="cli-code" id="cliInstallCmd">curl -fsSL https://tursiops.dev/install.sh | sh</code>
+          <button class="copy-btn" id="btnCopyInstall" title="Copy install command">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span class="copy-status">Copy</span>
+          </button>
+        </div>
+
+        <!-- Real-Time Interactive ASCII Ocean & Diving Dolphin Showcase -->
+        <div class="ascii-ocean-wrapper" id="ascii-hero">
+          <div class="ocean-terminal-frame">
+            
+            <div class="ocean-terminal-topbar">
+              <div class="window-controls">
+                <span class="control-dot dot-close"></span>
+                <span class="control-dot dot-minimize"></span>
+                <span class="control-dot dot-maximize"></span>
+              </div>
+              <div class="ocean-terminal-title">
+                <span class="pulse-indicator"></span>
+                <span>tursiops-ocean.sh — Real-time ASCII Water & Dolphin Physics</span>
+              </div>
+              <div class="ocean-terminal-tools">
+                <span class="ocean-fps" id="oceanFps">30 FPS</span>
+              </div>
+            </div>
+
+            <!-- The Live ASCII Rendering Pre Container -->
+            <div class="ascii-canvas-container" id="asciiCanvasContainer" title="Click on the water to create ripples!">
+              <pre class="ascii-canvas" id="asciiCanvas" aria-label="ASCII Water with Swimming Dolphin Animation"></pre>
+            </div>
+
+            <!-- Ocean Simulation Interactive Controls Bar -->
+            <div class="ocean-controls-bar">
+              <div class="ocean-control-left">
+                <button class="btn btn-sm btn-ocean-action" id="btnLeapDolphin">
+                  <span class="ocean-btn-icon">🐬</span>
+                  <span>Make Dolphin Leap! (Space)</span>
+                </button>
+                <button class="btn btn-sm btn-ocean-subtle" id="btnToggleSeaState">
+                  <span>🌊 Sea: <strong id="seaStateLabel">Swell</strong></span>
+                </button>
+                <button class="btn btn-sm btn-ocean-subtle" id="btnTogglePlay">
+                  <span id="playIcon">⏸</span> <span id="playLabel">Pause</span>
+                </button>
+              </div>
+              <div class="ocean-control-right">
+                <span class="ocean-telemetry" id="oceanTelemetry">State: Cruising &bull; Depth: -4.2m &bull; Velocity: 14.2 kn</span>
+              </div>
+            </div>
+
+          </div>
+          <div class="ocean-caption">
+            <span>💡 <strong>Interactive ASCII Canvas:</strong> Click anywhere on the water to generate wave ripples, or press <code>Spacebar</code> to launch the dolphin into a high leap.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION: Built For Your Editor — The Reference Extension UI Showcase -->
+    <section class="section extension-section" id="extension">
+      <div class="section-header">
+        <div class="section-tag">Editor Native</div>
+        <h2 class="section-title">Built For Your Editor — VS Code & Cursor Extension</h2>
+        <p class="section-desc">
+          Seamlessly integrate persistent context into your daily IDE workflow. Pin directives, inspect active memories, and control sessions right from your editor sidebar.
+        </p>
+      </div>
+
+      <div class="extension-showcase-container">
+        
+        <!-- The Clean IDE Extension Frame Recreated From The Reference Screenshot -->
+        <div class="extension-mockup-frame">
+          <div class="mockup-header">
             <div class="window-controls">
-              <span class="control-dot dot-close" title="Close"></span>
-              <span class="control-dot dot-minimize" title="Minimize"></span>
-              <span class="control-dot dot-maximize" title="Maximize"></span>
+              <span class="control-dot"></span>
+              <span class="control-dot"></span>
+              <span class="control-dot"></span>
             </div>
-            <div class="ide-titlebar-heading">
-              <span class="window-brand">TURSIOPS</span>
-            </div>
-            <div class="ide-titlebar-meta">
-              <span class="window-version">v1.2.0</span>
-            </div>
+            <div class="mockup-title">TURSIOPS</div>
+            <div class="mockup-ver">v1.2.0</div>
           </div>
 
-          <!-- Main IDE Shell: Activity Bar + Content Canvas -->
-          <div class="ide-body">
-            
-            <!-- Left Minimalist Activity Bar (Files, Search, Git, Extensions) -->
-            <aside class="activity-bar" aria-label="Activity Bar">
-              <button class="activity-btn active" title="Explorer (Files)" id="btnExplorer">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <div class="mockup-body">
+            <!-- Sidebar Activity Bar -->
+            <div class="mockup-activity">
+              <button class="mockup-act-btn active" title="Explorer">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
                 </svg>
               </button>
-              <button class="activity-btn" title="Search Directives" id="btnSearch">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <button class="mockup-act-btn" title="Search">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
               </button>
-              <button class="activity-btn" title="Source Control & Git Vault" id="btnSourceControl">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <button class="mockup-act-btn" title="Git Source Control">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                   <line x1="6" y1="3" x2="6" y2="15"></line>
                   <circle cx="18" cy="6" r="3"></circle>
                   <circle cx="6" cy="18" r="3"></circle>
                   <path d="M18 9a9 9 0 0 1-9 9"></path>
                 </svg>
               </button>
-              <button class="activity-btn" title="Extensions & Memory Agents" id="btnExtensions">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <button class="mockup-act-btn" title="Memory Extensions">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                   <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
                   <line x1="12" y1="22" x2="12" y2="15.5"></line>
                   <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
                 </svg>
               </button>
-              <div class="activity-bar-spacer"></div>
-              <button class="activity-btn" title="Vault Settings" id="btnSettings">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <div class="mockup-act-spacer"></div>
+              <button class="mockup-act-btn" title="Settings">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                 </svg>
               </button>
-            </aside>
+            </div>
 
-            <!-- Center Stage Matching The Screenshot -->
-            <div class="ide-stage">
-              <div class="hero-content">
+            <!-- Center Panel Matching The Extension UI Reference -->
+            <div class="mockup-panel">
+              <div class="mockup-panel-content">
                 
-                <!-- Stylized Glowing ASCII Art for TURSIOPS -->
-                <div class="ascii-wrapper" id="asciiWrapper" title="TURSIOPS ASCII Matrix">
-                  <pre class="ascii-logo">
+                <!-- Stylized Monospace Wordmark -->
+                <pre class="mockup-ascii-logo">
  _____ _   _ ____  ____ ___ ___  ____  ____  
 |_   _| | | |  _ \/ ___|_ _/ _ \|  _ \/ ___| 
   | | | | | | |_) \___ \| | | | | |_) \___ \ 
   | | | |_| |  _ < ___) | | |_| |  __/ ___) |
   |_|  \___/|_| \_\____/___\___/|_|   |____/ </pre>
-                </div>
 
-                <!-- Titles and Subtitles Exactly As In Provided Image -->
-                <h1 class="hero-headline">Persistent Coding Memory</h1>
-                <p class="hero-subline">
-                  File-specific context and directives across AI coding sessions.
-                </p>
+                <h3 class="mockup-heading">Persistent Coding Memory</h3>
+                <p class="mockup-sub">File-specific context and directives across AI coding sessions.</p>
 
-                <!-- Action Button Group Matching The Screenshot -->
-                <div class="action-card">
-                  <button class="btn btn-primary" id="btnHeroSignIn">Sign In</button>
-                  <button class="btn btn-secondary" id="btnHeroSignUp">Sign Up</button>
-                  <button class="link-btn" id="btnContinueOffline">
+                <div class="mockup-actions">
+                  <button class="btn btn-primary mockup-btn" id="btnExtensionSignIn">Sign In</button>
+                  <button class="btn btn-secondary mockup-btn" id="btnExtensionSignUp">Sign Up</button>
+                  <button class="link-btn mockup-offline" id="btnExtensionOffline">
                     <span>Continue offline</span>
                     <span class="arrow-glyph">&rarr;</span>
                   </button>
                 </div>
 
-                <!-- Developer Quick-Copy CLI Snippet -->
-                <div class="cli-quickstart">
-                  <span class="cli-prompt">$</span>
-                  <code class="cli-code" id="cliInstallCmd">curl -fsSL https://tursiops.dev/install.sh | sh</code>
-                  <button class="copy-btn" id="btnCopyInstall" title="Copy install command">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <span class="copy-status">Copy</span>
-                  </button>
+                <div class="mockup-cli-tag">
+                  <code>$ curl -fsSL https://tursiops.dev/install.sh | sh</code>
                 </div>
 
-                <div class="agent-compat-tags">
-                  <span class="compat-label">Syncs across:</span>
-                  <span class="compat-tag">Claude Code</span>
-                  <span class="compat-tag">Cursor</span>
-                  <span class="compat-tag">Antigravity</span>
-                  <span class="compat-tag">Copilot</span>
-                  <span class="compat-tag">Neovim</span>
+                <div class="mockup-sync-pills">
+                  <span>Syncs across:</span>
+                  <span class="pill">Claude Code</span>
+                  <span class="pill">Cursor</span>
+                  <span class="pill">Antigravity</span>
+                  <span class="pill">Copilot</span>
+                  <span class="pill">Neovim</span>
                 </div>
-
               </div>
             </div>
-
           </div>
 
-          <!-- Bottom Status Bar -->
-          <div class="ide-statusbar">
-            <div class="status-left">
-              <span class="status-item"><span class="status-led online"></span> Local Vault Ready</span>
-              <span class="status-item branch-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg> main</span>
-              <span class="status-item">UTF-8</span>
-            </div>
-            <div class="status-right">
-              <span class="status-item">0 Conflicts</span>
-              <span class="status-item memory-status">Directives: 24 active</span>
-              <span class="status-item">Tursiops Engine v1.2.0</span>
+          <div class="mockup-statusbar">
+            <span class="stat-item"><span class="status-led online"></span> Local Vault Ready</span>
+            <span class="stat-item">main</span>
+            <span class="stat-item">UTF-8</span>
+            <span class="stat-spacer"></span>
+            <span class="stat-item">0 Conflicts</span>
+            <span class="stat-item stat-hl">Directives: 24 active</span>
+            <span class="stat-item">Tursiops Engine v1.2.0</span>
+          </div>
+        </div>
+
+        <!-- Extension Value Props Sidebar -->
+        <div class="extension-features-list">
+          <div class="ext-feature-item">
+            <div class="ext-feat-icon">⚡</div>
+            <div class="ext-feat-text">
+              <h4>Zero-Friction Authentication</h4>
+              <p>Sign in with GitHub or your organization's SSO in one click, or operate in 100% air-gapped offline mode.</p>
             </div>
           </div>
 
+          <div class="ext-feature-item">
+            <div class="ext-feat-icon">📌</div>
+            <div class="ext-feat-text">
+              <h4>Directives In Editor Gutter</h4>
+              <p>See pinned architectural directives inline next to line numbers. Know immediately why a file was structured a certain way.</p>
+            </div>
+          </div>
+
+          <div class="ext-feature-item">
+            <div class="ext-feat-icon">🛡️</div>
+            <div class="ext-feat-text">
+              <h4>Real-Time AI Diff Validation</h4>
+              <p>Whenever an AI assistant edits code, the Tursiops extension runs your AST directives to ensure no regression slips through.</p>
+            </div>
+          </div>
+
+          <div class="ext-feature-item">
+            <div class="ext-feat-icon">🗄️</div>
+            <div class="ext-feat-text">
+              <h4>Git-Synchronized Vault</h4>
+              <p>Directives commit alongside your code in <code>.tursiops/</code>. New team members inherit full coding memory on <code>git clone</code>.</p>
+            </div>
+          </div>
         </div>
 
       </div>
     </section>
 
-    <!-- Interactive Live Demo Section: Full IDE Inspector -->
+    <!-- SECTION: Features Grid -->
+    <section class="section features-section" id="features">
+      <div class="section-header">
+        <div class="section-tag">Key Innovations</div>
+        <h2 class="section-title">Why Developers Choose Tursiops</h2>
+        <p class="section-desc">
+          Designed specifically to solve the "amnesia" problem of autonomous AI coding assistants.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">File-Scoped Directives</h3>
+          <p class="feature-text">
+            Attach rules directly to paths or globs. When an agent opens <code>src/db/</code>, it automatically receives your exact transaction patterns.
+          </p>
+          <div class="feature-footer-code">
+            <code>.tursiops/directives.json</code>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3 class="feature-title">Cross-Session Continuity</h3>
+          <p class="feature-text">
+            Clear your context window or swap between Claude Code, Cursor, and Copilot without re-prompting rules. Your architectural constraints survive every wipe.
+          </p>
+          <div class="feature-footer-code">
+            <code>Zero Context Eviction</code>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+              <line x1="1" y1="23" x2="23" y2="23"></line>
+            </svg>
+          </div>
+          <h3 class="feature-title">100% Offline & Git-Native</h3>
+          <p class="feature-text">
+            No remote telemetry or forced cloud lock-in. Your memory lives in plain text and SQLite inside your repo. Commits and branches alongside your code.
+          </p>
+          <div class="feature-footer-code">
+            <code>Air-gapped Ready</code>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Regression Prevention</h3>
+          <p class="feature-text">
+            Linter-style AST guards detect when an AI model attempts to delete an error handler, revert a schema fix, or ignore established conventions.
+          </p>
+          <div class="feature-footer-code">
+            <code>Deterministic Verification</code>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </div>
+          <h3 class="feature-title">Minimal Token Overhead</h3>
+          <p class="feature-text">
+            Rather than dumping entire chat transcripts, Tursiops distills directives into high-density tokens injected only when relevant files are touched.
+          </p>
+          <div class="feature-footer-code">
+            <code>&lt; 120 Tokens / Request</code>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </div>
+          <h3 class="feature-title">Team Memory Merge Driver</h3>
+          <p class="feature-text">
+            Custom git merge driver prevents merge conflicts when multiple engineers and autonomous agents update file directives simultaneously.
+          </p>
+          <div class="feature-footer-code">
+            <code>git config merge.tursiops</code>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION: Interactive IDE Demo Section with Directive Guard -->
     <section class="section demo-section" id="demo">
       <div class="section-header">
         <div class="section-tag">Interactive Simulation</div>
@@ -332,7 +568,7 @@
       </div>
     </section>
 
-    <!-- Interactive Terminal Playground -->
+    <!-- SECTION: Interactive Terminal Playground -->
     <section class="section terminal-section" id="terminal">
       <div class="section-header">
         <div class="section-tag">Zero Cloud Lock-in</div>
@@ -378,118 +614,7 @@
       </div>
     </section>
 
-    <!-- Features Section: Developer-grade design -->
-    <section class="section features-section" id="features">
-      <div class="section-header">
-        <div class="section-tag">Architecture & Capabilities</div>
-        <h2 class="section-title">Built for Engineers Who Code with AI</h2>
-        <p class="section-desc">
-          Stop repeating yourself across conversation threads. Give your codebase an unshakeable memory layer.
-        </p>
-      </div>
-
-      <div class="features-grid">
-        
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-          </div>
-          <h3 class="feature-title">File-Scoped Directives</h3>
-          <p class="feature-text">
-            Attach rules directly to paths or globs. When an agent opens <code>src/db/</code>, it automatically receives your exact transaction patterns.
-          </p>
-          <div class="feature-footer-code">
-            <code>.tursiops/directives.json</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </div>
-          <h3 class="feature-title">Cross-Session Continuity</h3>
-          <p class="feature-text">
-            Clear your context window or swap between Claude Code, Cursor, and Copilot without re-prompting rules. Your architectural constraints survive every wipe.
-          </p>
-          <div class="feature-footer-code">
-            <code>Zero Context Eviction</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">100% Offline & Git-Native</h3>
-          <p class="feature-text">
-            No remote telemetry or forced cloud lock-in. Your memory lives in plain text and SQLite inside your repo. Commits and branches alongside your code.
-          </p>
-          <div class="feature-footer-code">
-            <code>Air-gapped Ready</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-          </div>
-          <h3 class="feature-title">Regression Prevention</h3>
-          <p class="feature-text">
-            Linter-style AST guards detect when an AI model attempts to delete an error handler, revert a schema fix, or ignore established conventions.
-          </p>
-          <div class="feature-footer-code">
-            <code>Deterministic Verification</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="16 18 22 12 16 6"></polyline>
-              <polyline points="8 6 2 12 8 18"></polyline>
-            </svg>
-          </div>
-          <h3 class="feature-title">Minimal Token Overhead</h3>
-          <p class="feature-text">
-            Rather than dumping entire chat transcripts, Tursiops distills directives into high-density tokens injected only when relevant files are touched.
-          </p>
-          <div class="feature-footer-code">
-            <code>&lt; 120 Tokens / Request</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-              <line x1="6" y1="6" x2="6.01" y2="6"></line>
-              <line x1="6" y1="18" x2="6.01" y2="18"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">Team Memory Merge Driver</h3>
-          <p class="feature-text">
-            Custom git merge driver prevents merge conflicts when multiple engineers and autonomous agents update file directives simultaneously.
-          </p>
-          <div class="feature-footer-code">
-            <code>git config merge.tursiops</code>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Architecture & Specification Section -->
+    <!-- SECTION: Architecture & Specification -->
     <section class="section arch-section" id="architecture">
       <div class="section-header">
         <div class="section-tag">Under the Hood</div>
@@ -531,7 +656,7 @@
       </div>
     </section>
 
-    <!-- Benchmark & Comparison Table -->
+    <!-- SECTION: Comparison Table -->
     <section class="section compare-section">
       <div class="section-header">
         <div class="section-tag">Comparison</div>
@@ -585,7 +710,7 @@
     </section>
 
     <!-- Bottom Call-To-Action -->
-    <section class="section cta-section" id="docs">
+    <section class="section cta-section">
       <div class="cta-box">
         <div class="cta-ascii">
           <pre>
@@ -625,10 +750,11 @@
       <div class="footer-col">
         <h4>Product</h4>
         <ul>
+          <li><a href="#hero">ASCII Ocean</a></li>
           <li><a href="#features">Features</a></li>
-          <li><a href="#demo">Interactive IDE</a></li>
+          <li><a href="#extension">Extension UI</a></li>
+          <li><a href="#demo">Memory Inspector</a></li>
           <li><a href="#terminal">CLI Playground</a></li>
-          <li><a href="#architecture">Architecture</a></li>
         </ul>
       </div>
 
@@ -666,7 +792,7 @@
     </div>
   </footer>
 
-  <!-- Sign In / Sign Up Developer Modal (Matching the image theme) -->
+  <!-- Sign In / Sign Up Developer Modal -->
   <div class="modal-overlay" id="authModal" aria-hidden="true">
     <div class="modal-card">
       <div class="modal-header">

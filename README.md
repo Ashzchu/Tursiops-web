@@ -9,15 +9,14 @@
 ```
 
 ### Persistent Coding Memory for AI Sessions
-
-*File-specific context and directives across AI coding sessions.*
+*File-specific context and directives across AI coding sessions. Memory that never sinks.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-1.2.0-cyan.svg)](https://github.com/Ashzchu/Tursiops-web)
+[![ASCII Physics](https://img.shields.io/badge/ASCII_Ocean-60_FPS-38bdf8.svg)](https://github.com/Ashzchu/Tursiops-web)
 [![Offline Ready](https://img.shields.io/badge/offline-100%25-emerald.svg)](https://github.com/Ashzchu/Tursiops-web)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ashzchu/Tursiops-web/pulls)
 
-[Live Demo](https://ashzchu.github.io/Tursiops-web) • [Documentation](#documentation) • [Architecture](#architecture) • [CLI Quickstart](#quickstart)
+[Live Demo](http://localhost:8000) • [Architecture](#architecture) • [CLI Quickstart](#quickstart) • [VS Code Extension](#extension-ui)
 
 </div>
 
@@ -36,13 +35,40 @@ Tursiops solves this by attaching **file-specific memory nodes and architectural
 
 ---
 
-## 🖥️ Landing Page Design & Structure
+## 🐬 Real-Time ASCII Ocean & Diving Dolphin
 
-This repository contains the minimalist developer-centric landing page for Tursiops, built entirely with standard web technologies:
+Inspired by developer terminal culture and ASCII art aesthetics, the Tursiops hero features a **pure ASCII water physics simulation**:
+- **Dynamic Wave Equations**: Multi-octave sinusoidal ocean wave undulations with interactive ripple propagation.
+- **Dolphin Kinematics**: Procedural ASCII dolphin with full swimming, swooping, leaping, cresting, and diving phases.
+- **Particle System**: Splash droplets (`*`, `'`, `°`) on breaching and re-entry, with floating bubbles (`o`, `°`, `.`) in deep water.
+- **Interactive Controls**:
+  - Click anywhere on the water surface to create dynamic ripples.
+  - Press `Spacebar` or click **"Make Dolphin Leap!"** to launch the dolphin into a high breach.
+  - Toggle sea states between **Calm**, **Swell**, and **Rough**.
 
-- **`index.html`**: Clean semantic HTML5 structure with SEO meta tags, OpenGraph metadata, and accessible DOM hierarchy.
-- **`style.css`**: Deep midnight palette (`#06090e`), custom CSS design tokens, glowing ASCII logo, IDE activity bar, tabbed code viewer, and responsive breakpoints.
-- **`app.js`**: Interactive terminal engine, real-time command evaluation, code simulation triggers, developer modal authentication, and clipboard handlers.
+---
+
+## 🖥️ IDE Extension UI Showcase
+
+Tursiops provides an official IDE sidebar extension for VS Code and Cursor:
+- **Directives in Editor Gutter**: Inline architectural rules pinned right to AST symbols.
+- **Instant Authentication & Offline Vault**: Sign in via GitHub or run 100% offline air-gapped with local keys.
+- **Live Memory Inspector**: Track active directives across sessions with zero cognitive load.
+
+---
+
+## 📁 Repository Structure
+
+Cleanly separated vanilla web stack:
+
+```
+├── index.html       # Semantic HTML5 layout, hero, ASCII canvas, extension showcase
+├── style.css        # CSS custom properties, dark theme tokens, ASCII color styles
+├── app.js           # ASCII physics simulation, terminal emulator, interactive tabs
+├── README.md        # Documentation and quickstart
+├── LICENSE          # MIT License
+└── .gitignore       # Git hygiene
+```
 
 ---
 
@@ -83,40 +109,16 @@ tursiops init
 
 ---
 
-## 🏗️ Architecture
-
-```
-Repository Root
-├── src/
-│   ├── auth/session.ts   <─── [Directives Injected via LSP/MCP]
-│   └── db/client.ts
-└── .tursiops/
-    ├── directives.json   <─── Pinned rules and architectural constraints
-    ├── graph.db          <─── Local SQLite context graph
-    └── config.yaml       <─── Agent adapters (Claude, Cursor, Copilot)
-```
-
-### Just-In-Time (JIT) Injection
-Unlike naive context approaches that dump entire conversation histories, Tursiops only injects directives when an AI assistant reads or modifies files matching target glob patterns (under 120 tokens per prompt).
-
----
-
 ## 🧪 Local Preview
 
-To run this landing page locally:
+To view the landing page locally:
 
 ```bash
-# Clone the repository
-git clone https://github.com/Ashzchu/Tursiops-web.git
-cd Tursiops-web
-
-# Serve with any static web server (e.g. Python, Node, or VS Code Live Server)
-python -m http.server 3000
-# or
-npx serve .
+# Serve with Python
+python -m http.server 8000
 ```
 
-Then open `http://localhost:3000` in your browser.
+Open **`http://localhost:8000`** in your browser.
 
 ---
 
