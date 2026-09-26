@@ -2,24 +2,25 @@
  * Database client and schema management for Turso (libSQL)
  * Supports columns: s_no (Auto-increment PK), Email, Name, Passw, password_hash, gemini_key, id
  */
-import { createClient } from '@libsql/client';
+import { createClient } from '@libsql/client/web';
 import dotenv from 'dotenv';
 import { randomUUID } from 'crypto';
 
 dotenv.config();
 
-const url = process.env.TURSO_DATABASE_URL;
+const defaultUrl = 'libsql://tursiops-ashzchu.aws-ap-south-1.turso.io';
+const url = process.env.TURSO_DATABASE_URL || defaultUrl;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
-if (!url) {
-  console.warn('[WARN] TURSO_DATABASE_URL is not set in environment variables.');
+if (!process.env.TURSO_DATABASE_URL) {
+  console.warn('[WARN] TURSO_DATABASE_URL not set in environment variables. Using default remote URL:', url);
 }
 
 /**
- * Turso libSQL Client instance
+ * Turso libSQL Client instance (Web standard / fetch-based for serverless compatibility)
  */
 export const db = createClient({
-  url: url || 'file:local.db',
+  url,
   authToken: authToken || undefined,
 });
 
