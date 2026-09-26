@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TURSIOPS — Frontend Controller
  * Bland dashboard with header Sign In modal pop-up and Turso authentication flow.
  */
@@ -132,8 +132,26 @@ function initDashboardAuth() {
   modalTabSignIn.addEventListener('click', () => setMode('login'));
   modalTabSignUp.addEventListener('click', () => setMode('signup'));
 
+  function formatErrorMessage(errData) {
+    if (!errData) return 'An error occurred during authentication.';
+    if (typeof errData === 'string') return errData;
+    if (typeof errData === 'object') {
+      if (errData.message && typeof errData.message === 'string') return errData.message;
+      if (errData.error) {
+        if (typeof errData.error === 'string') return errData.error;
+        if (errData.error.message && typeof errData.error.message === 'string') return errData.error.message;
+      }
+      try {
+        return JSON.stringify(errData);
+      } catch {
+        return 'An error occurred during authentication.';
+      }
+    }
+    return String(errData);
+  }
+
   function showAlert(msg, type = 'error') {
-    authAlertBox.textContent = msg;
+    authAlertBox.textContent = formatErrorMessage(msg);
     authAlertBox.className = `auth-alert-box ${type}`;
   }
 
@@ -276,10 +294,16 @@ function initDashboardAuth() {
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { message: await res.text().catch(() => 'Authentication failed') };
+      }
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || 'Authentication failed');
+        const errMsg = formatErrorMessage(data);
+        throw new Error(errMsg);
       }
 
       if (data.token) {
@@ -305,3 +329,4 @@ function initDashboardAuth() {
     }
   });
 }
+

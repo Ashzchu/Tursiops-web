@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Database client and schema management for Turso (libSQL)
  * Supports columns: s_no (Auto-increment PK), Email, Name, Passw, password_hash, gemini_key, id
  */
@@ -9,8 +9,9 @@ import { randomUUID } from 'crypto';
 dotenv.config();
 
 const defaultUrl = 'libsql://tursiops-ashzchu.aws-ap-south-1.turso.io';
+const defaultAuthToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTA0NDk5MTgsImlkIjoiMDFhMGRmMjEtODUwMS03MGMyLWJlODEtNDI1YzE2ZDYzZjg3Iiwia2lkIjoiM25VdmtERTU0U2Z3U1JkczZ5NWE2Rkw0Tzh6UEFBMDFFUGhmZlRCZWNrMCIsInJpZCI6IjY0ODc0NjQyLTdhY2EtNDExMS1iOWEzLWU3OWM1ZGZkOTE3NSJ9.Ga2F-M7R34SzCjqXpuPnhD7I48qm21hha7jrFyWksAZzrZEpIFsJJ0rqlmgy1tYPLDI9cLTdjoC1pb-jg1q6DA';
 const url = process.env.TURSO_DATABASE_URL || defaultUrl;
-const authToken = process.env.TURSO_AUTH_TOKEN;
+const authToken = process.env.TURSO_AUTH_TOKEN || defaultAuthToken;
 
 if (!process.env.TURSO_DATABASE_URL) {
   console.warn('[WARN] TURSO_DATABASE_URL not set in environment variables. Using default remote URL:', url);
@@ -238,3 +239,4 @@ export async function saveGeminiKey(idOrEmail, key) {
 
   return true;
 }
+
