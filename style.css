@@ -462,60 +462,6 @@ body {
   margin-top: 10px;
 }
 
-.ocean-terminal-frame {
-  background-color: #06090e;
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.15);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.ocean-terminal-topbar {
-  height: 42px;
-  background-color: #080d16;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  user-select: none;
-}
-
-.window-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 70px;
-}
-
-.control-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #273142;
-}
-
-.dot-close:hover { background-color: #ef4444; }
-.dot-minimize:hover { background-color: #f59e0b; }
-.dot-maximize:hover { background-color: #10b981; }
-
-.ocean-terminal-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.ocean-terminal-tools {
-  width: 70px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .ocean-fps {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -527,27 +473,31 @@ body {
 
 /* The ASCII Canvas Container */
 .ascii-canvas-container {
-  background: #05080e;
+  background: transparent;
   padding: 22px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: crosshair;
-  min-height: 290px;
+  min-height: 310px;
   overflow: hidden;
   position: relative;
+  /* Fade out edges so the ocean seamlessly blends into the background */
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 .ascii-canvas {
   font-family: var(--font-mono);
-  font-size: 13.5px;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  font-weight: 700;
   user-select: none;
   white-space: pre;
   margin: 0;
   transition: transform 0.05s ease-out;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
 }
 
 /* ASCII Coloring Classes */
@@ -590,14 +540,19 @@ body {
 
 /* Controls Below ASCII Canvas */
 .ocean-controls-bar {
-  background-color: #080d15;
-  border-top: 1px solid var(--border-subtle);
+  background-color: transparent;
   padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+
+.ocean-controls-bar:hover {
+  opacity: 1;
 }
 
 .ocean-control-left {

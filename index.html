@@ -116,48 +116,32 @@
 
         <!-- Real-Time Interactive ASCII Ocean & Diving Dolphin Showcase -->
         <div class="ascii-ocean-wrapper" id="ascii-hero">
-          <div class="ocean-terminal-frame">
-            
-            <div class="ocean-terminal-topbar">
-              <div class="window-controls">
-                <span class="control-dot dot-close"></span>
-                <span class="control-dot dot-minimize"></span>
-                <span class="control-dot dot-maximize"></span>
-              </div>
-              <div class="ocean-terminal-title">
-                <span class="pulse-indicator"></span>
-                <span>tursiops-ocean.sh — Real-time ASCII Water & Dolphin Physics</span>
-              </div>
-              <div class="ocean-terminal-tools">
-                <span class="ocean-fps" id="oceanFps">30 FPS</span>
-              </div>
-            </div>
-
-            <!-- The Live ASCII Rendering Pre Container -->
-            <div class="ascii-canvas-container" id="asciiCanvasContainer" title="Click on the water to create ripples!">
-              <pre class="ascii-canvas" id="asciiCanvas" aria-label="ASCII Water with Swimming Dolphin Animation"></pre>
-            </div>
-
-            <!-- Ocean Simulation Interactive Controls Bar -->
-            <div class="ocean-controls-bar">
-              <div class="ocean-control-left">
-                <button class="btn btn-sm btn-ocean-action" id="btnLeapDolphin">
-                  <span class="ocean-btn-icon">🐬</span>
-                  <span>Make Dolphin Leap! (Space)</span>
-                </button>
-                <button class="btn btn-sm btn-ocean-subtle" id="btnToggleSeaState">
-                  <span>🌊 Sea: <strong id="seaStateLabel">Swell</strong></span>
-                </button>
-                <button class="btn btn-sm btn-ocean-subtle" id="btnTogglePlay">
-                  <span id="playIcon">⏸</span> <span id="playLabel">Pause</span>
-                </button>
-              </div>
-              <div class="ocean-control-right">
-                <span class="ocean-telemetry" id="oceanTelemetry">State: Cruising &bull; Depth: -4.2m &bull; Velocity: 14.2 kn</span>
-              </div>
-            </div>
-
+          
+          <!-- The Live ASCII Rendering Pre Container -->
+          <div class="ascii-canvas-container" id="asciiCanvasContainer" title="Click on the water to create ripples!">
+            <pre class="ascii-canvas" id="asciiCanvas" aria-label="ASCII Water with Swimming Dolphin Animation"></pre>
           </div>
+
+          <!-- Ocean Simulation Interactive Controls Bar -->
+          <div class="ocean-controls-bar">
+            <div class="ocean-control-left">
+              <button class="btn btn-sm btn-ocean-action" id="btnLeapDolphin">
+                <span class="ocean-btn-icon">🐬</span>
+                <span>Make Dolphin Leap! (Space)</span>
+              </button>
+              <button class="btn btn-sm btn-ocean-subtle" id="btnToggleSeaState">
+                <span>🌊 Sea: <strong id="seaStateLabel">Swell</strong></span>
+              </button>
+              <button class="btn btn-sm btn-ocean-subtle" id="btnTogglePlay">
+                <span id="playIcon">⏸</span> <span id="playLabel">Pause</span>
+              </button>
+            </div>
+            <div class="ocean-control-right">
+              <span class="ocean-telemetry" id="oceanTelemetry">State: Cruising &bull; Depth: -4.2m &bull; Velocity: 14.2 kn</span>
+              <span class="ocean-fps" id="oceanFps" style="margin-left: 10px;">30 FPS</span>
+            </div>
+          </div>
+
           <div class="ocean-caption">
             <span>💡 <strong>Interactive ASCII Canvas:</strong> Click anywhere on the water to generate wave ripples, or press <code>Spacebar</code> to launch the dolphin into a high leap.</span>
           </div>
