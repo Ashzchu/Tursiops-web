@@ -123,12 +123,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const redirectUri = urlParams.get('redirect_uri');
+      const redirect = urlParams.get('redirect');
+      const target = redirectUri || redirect;
       const deepLinkBanner = document.getElementById('deepLinkBanner');
       const deepLinkTarget = document.getElementById('deepLinkTarget');
 
-      if (redirectUri && deepLinkBanner && deepLinkTarget) {
+      if (target && deepLinkBanner && deepLinkTarget) {
         deepLinkBanner.style.display = 'block';
-        deepLinkTarget.textContent = redirectUri;
+        deepLinkTarget.textContent = target;
+      }
+
+      // Preserve query params across nav / tab links
+      if (window.location.search) {
+        document.querySelectorAll('a[href="/signup"], a[href="/signin"]').forEach(a => {
+          const base = a.getAttribute('href').split('?')[0];
+          a.setAttribute('href', `${base}${window.location.search}`);
+        });
       }
 
       const form = document.getElementById('standaloneSignUpForm');
@@ -170,9 +180,16 @@
 
         try {
           const body = { name, email, password, confirmPassword };
+          if (redirect) body.redirect = redirect;
           if (redirectUri) body.redirect_uri = redirectUri;
 
-          const res = await fetch('/signup', {
+          const params = new URLSearchParams();
+          if (redirect) params.set('redirect', redirect);
+          if (redirectUri) params.set('redirect_uri', redirectUri);
+          const queryString = params.toString();
+          const fetchUrl = queryString ? `/signup?${queryString}` : '/signup';
+
+          const res = await fetch(fetchUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -194,6 +211,9 @@
           alertBox.style.display = '';
 
           if (data.redirect_url) {
+            if (data.redirect_url.startsWith('vscode:') || data.redirect_url.startsWith('cursor:')) {
+              alertBox.innerHTML = `✓ Account created! Returning to VS Code...<br><a href="${data.redirect_url}" style="color:var(--neon-cyan);text-decoration:underline;display:inline-block;margin-top:6px;font-size:12px;">Click here if VS Code does not open automatically</a>`;
+            }
             window.location.href = data.redirect_url;
           } else {
             setTimeout(() => { window.location.href = '/landing'; }, 1000);

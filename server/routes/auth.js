@@ -11,7 +11,52 @@ const router = Router();
  * Helper to extract redirect_uri from query parameters or body
  */
 function getRedirectUri(req) {
-  return req.query.redirect_uri || req.body.redirect_uri || null;
+  const uri = req.query.redirect_uri || req.body?.redirect_uri;
+  if (uri) return uri;
+
+  const redirect = req.query.redirect || req.body?.redirect;
+  if (redirect && (redirect.includes('://') || redirect.startsWith('vscode:') || redirect.startsWith('cursor:'))) {
+    return redirect;
+  }
+  return null;
+}
+
+/**
+ * Helper to extract redirect param (e.g. 'vscode') from query or body
+ */
+function getRedirectParam(req) {
+  return req.query.redirect || req.body?.redirect || null;
+}
+
+/**
+ * Determine if request is from fetch / AJAX / JSON client
+ */
+function isJsonRequest(req) {
+  if (req.is('json')) return true;
+  if (req.xhr) return true;
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('application/json')) return true;
+  const accept = req.headers['accept'] || '';
+  if (accept.includes('application/json') && !accept.includes('text/html')) return true;
+  if (!req.accepts('html')) return true;
+  return false;
+}
+
+/**
+ * Resolves the final redirect URL (if any) for deep linking.
+ */
+function resolveRedirectUrl(req, token, user) {
+  const redirectUri = getRedirectUri(req);
+  if (redirectUri) {
+    return buildCallbackUrl(redirectUri, token, { email: user.email });
+  }
+
+  const redirectParam = getRedirectParam(req);
+  if (redirectParam === 'vscode') {
+    return `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${encodeURIComponent(user.email)}`;
+  }
+
+  return null;
 }
 
 /**
@@ -131,10 +176,28 @@ router.post('/signup', async (req, res, next) => {
     const token = generateToken(newUser);
 
     // 6. Handle Response / Deep Link Redirection
-    if (redirectUri) {
-      const callbackUrl = buildCallbackUrl(redirectUri, token);
-      console.log(`[AUTH] User ${newUser.email} signed up. Redirecting 302 to: ${callbackUrl}`);
-      return res.redirect(302, callbackUrl);
+    const redirectUrl = resolveRedirectUrl(req, token, newUser);
+
+    if (isJsonRequest(req)) {
+      const responsePayload = {
+        success: true,
+        message: 'Account created successfully',
+        token,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+        },
+      };
+      if (redirectUrl) {
+        responsePayload.redirect_url = redirectUrl;
+      }
+      return res.status(201).json(responsePayload);
+    }
+
+    if (redirectUrl) {
+      console.log(`[AUTH] User ${newUser.email} signed up. Redirecting 302 to: ${redirectUrl}`);
+      return res.redirect(302, redirectUrl);
     }
 
     // Fallback: Standard Web Session Response
@@ -219,17 +282,28 @@ router.post('/login', async (req, res, next) => {
     const token = generateToken(user);
 
     // 5. Handle Response / Deep Link Redirection
-    if (redirectUri) {
-      const callbackUrl = buildCallbackUrl(redirectUri, token);
-      console.log(`[AUTH] User ${user.email} logged in. Redirecting 302 to: ${callbackUrl}`);
-      return res.redirect(302, callbackUrl);
+    const redirectUrl = resolveRedirectUrl(req, token, user);
+
+    if (isJsonRequest(req)) {
+      const responsePayload = {
+        success: true,
+        message: 'Authenticated successfully',
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      };
+      if (redirectUrl) {
+        responsePayload.redirect_url = redirectUrl;
+      }
+      return res.status(200).json(responsePayload);
     }
 
-    // If the request came from the VS Code extension, redirect back to it
-    if (req.query.redirect === 'vscode') {
-      return res.redirect(
-        `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${encodeURIComponent(user.email)}`
-      );
+    if (redirectUrl) {
+      console.log(`[AUTH] User ${user.email} logged in. Redirecting 302 to: ${redirectUrl}`);
+      return res.redirect(302, redirectUrl);
     }
 
     // Normal web/API response

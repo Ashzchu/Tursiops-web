@@ -153,13 +153,14 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server and Initialize Database (local dev only)
-// On Vercel, api/index.js imports this module — we skip listen()
+// On Vercel or when imported by integration tests, we skip listen()
 const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 
 async function start() {
   try {
     await initDb();
-    if (!isVercel) {
+    if (!isVercel && isDirectRun) {
       app.listen(PORT, () => {
         console.log(`====================================================`);
         console.log(`🐬 TURSIOPS AUTH SERVER RUNNING ON PORT ${PORT}`);
@@ -172,11 +173,13 @@ async function start() {
     }
   } catch (err) {
     console.error('Fatal error starting server:', err);
-    if (!isVercel) process.exit(1);
+    if (!isVercel && isDirectRun) process.exit(1);
   }
 }
 
-start();
+if (!isVercel && isDirectRun) {
+  start();
+}
 
 export default app;
 

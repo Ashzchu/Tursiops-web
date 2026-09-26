@@ -109,17 +109,19 @@ function initPortalApp() {
   const pathname = window.location.pathname.toLowerCase();
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUri = urlParams.get('redirect_uri');
+  const redirect = urlParams.get('redirect');
+  const target = redirectUri || redirect;
   const modeParam = urlParams.get('mode');
 
-  if (redirectUri && deepLinkBanner && deepLinkTarget) {
+  if (target && deepLinkBanner && deepLinkTarget) {
     deepLinkBanner.style.display = 'block';
-    deepLinkTarget.textContent = redirectUri;
+    deepLinkTarget.textContent = target;
   }
 
   // Automatic Modal Opening based on 3 Base URL Links (/signup, /signin, /landing)
   if (pathname === '/signup' || modeParam === 'signup') {
     openModal('signup');
-  } else if (pathname === '/signin' || pathname === '/login' || modeParam === 'signin' || modeParam === 'login' || redirectUri) {
+  } else if (pathname === '/signin' || pathname === '/login' || modeParam === 'signin' || modeParam === 'login' || target) {
     openModal('login');
   }
 
@@ -203,8 +205,8 @@ function initPortalApp() {
       if (password !== confirmPassword) {
         return showAlert('Passwords do not match.');
       }
-      if (password.length < 6) {
-        return showAlert('Password must be at least 6 characters.');
+      if (password.length < 8) {
+        return showAlert('Password must be at least 8 characters.');
       }
     }
 
@@ -215,9 +217,16 @@ function initPortalApp() {
       const endpoint = mode === 'signup' ? '/signup' : '/login';
       const body = { email, password };
       if (mode === 'signup') body.name = name || undefined;
+      if (redirect) body.redirect = redirect;
       if (redirectUri) body.redirect_uri = redirectUri;
 
-      const res = await fetch(endpoint, {
+      const params = new URLSearchParams();
+      if (redirect) params.set('redirect', redirect);
+      if (redirectUri) params.set('redirect_uri', redirectUri);
+      const queryString = params.toString();
+      const fetchUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const res = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

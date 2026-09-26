@@ -1,5 +1,16 @@
 /**
  * Database client and schema management for Turso (libSQL)
+ *
+ * Remote schema (tursiops-ashzchu.aws-ap-south-1.turso.io):
+ *   s_no        INTEGER PRIMARY KEY (auto-increment)
+ *   Email       TEXT NOT NULL UNIQUE
+ *   Name        TEXT
+ *   Passw       TEXT NOT NULL  ← bcrypt password hash
+ *   password_hash TEXT         ← legacy duplicate of Passw (kept for compat)
+ *   gemini_key  TEXT
+ *   id          TEXT           ← usr_<uuid> application-level ID
+ *   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+ *   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
  */
 import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
@@ -11,7 +22,7 @@ const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url) {
-  // Allow local fallback in dev; Vercel startup guard in api/index.js catches missing vars in production
+  // Allow local fallback in dev; Vercel startup guard in server.js catches missing vars in production
   console.warn('[WARN] TURSO_DATABASE_URL is not set — falling back to local SQLite file (local.db). Set this variable in production.');
 }
 
@@ -25,35 +36,30 @@ export const db = createClient({
 
 /**
  * Initializes the database schema.
- * Creates the `users` table with id, name, email, and password_hash,
- * along with necessary indexes and migrations.
+ * Safe to run on every startup — uses CREATE TABLE IF NOT EXISTS.
  */
 export async function initDb() {
   try {
     console.log('[DB] Initializing database schema on Turso...');
 
-    // Users table definition
+    // Create table matching the existing remote schema
     await db.execute(`
       CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        s_no        INTEGER PRIMARY KEY AUTOINCREMENT,
+        Email       TEXT UNIQUE NOT NULL,
+        Name        TEXT,
+        Passw       TEXT NOT NULL,
+        password_hash TEXT,
+        gemini_key  TEXT,
+        id          TEXT,
+        created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // Migration: add name column if table existed without it
-    try {
-      await db.execute(`ALTER TABLE users ADD COLUMN name TEXT;`);
-    } catch (e) {
-      // Column already exists, safe to ignore
-    }
-
-    // Index on email for fast lookups
+    // Index on Email for fast lookups
     await db.execute(`
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(Email);
     `);
 
     console.log('[DB] Schema initialized successfully. `users` table is ready.');
@@ -64,14 +70,16 @@ export async function initDb() {
 }
 
 /**
- * Finds a user by email address (case-insensitive)
+ * Finds a user by email address (case-insensitive).
+ * Returns the internal shape the auth routes expect:
+ *   { id, name, email, password_hash, created_at }
  * @param {string} email
- * @returns {Promise<Object|null>} user record or null
+ * @returns {Promise<Object|null>}
  */
 export async function findUserByEmail(email) {
   const normalizedEmail = email.trim().toLowerCase();
   const result = await db.execute({
-    sql: 'SELECT id, name, email, password_hash, created_at FROM users WHERE LOWER(email) = ? LIMIT 1',
+    sql: 'SELECT id, Name, Email, Passw, created_at FROM users WHERE LOWER(Email) = ? LIMIT 1',
     args: [normalizedEmail],
   });
 
@@ -82,21 +90,22 @@ export async function findUserByEmail(email) {
   const row = result.rows[0];
   return {
     id: row.id,
-    name: row.name || null,
-    email: row.email,
-    password_hash: row.password_hash,
+    name: row.Name || null,
+    email: row.Email,
+    password_hash: row.Passw,   // normalised field name for the rest of the codebase
     created_at: row.created_at,
   };
 }
 
 /**
- * Finds a user by ID
+ * Finds a user by application ID (usr_<uuid>).
+ * Does NOT return the password hash.
  * @param {string} id
- * @returns {Promise<Object|null>} user record or null
+ * @returns {Promise<Object|null>}
  */
 export async function findUserById(id) {
   const result = await db.execute({
-    sql: 'SELECT id, name, email, created_at FROM users WHERE id = ? LIMIT 1',
+    sql: 'SELECT id, Name, Email, created_at FROM users WHERE id = ? LIMIT 1',
     args: [id],
   });
 
@@ -107,20 +116,21 @@ export async function findUserById(id) {
   const row = result.rows[0];
   return {
     id: row.id,
-    name: row.name || null,
-    email: row.email,
+    name: row.Name || null,
+    email: row.Email,
     created_at: row.created_at,
   };
 }
 
 /**
- * Creates a new user record in Turso
+ * Creates a new user record in Turso.
+ * Writes to both Passw (NOT NULL constraint) and password_hash (legacy compat).
  * @param {Object} params
- * @param {string} [params.name] developer name
+ * @param {string} [params.name]
  * @param {string} params.email
- * @param {string} params.passwordHash
- * @param {string} [params.id] optional custom ID
- * @returns {Promise<Object>} the newly created user object (excluding password hash)
+ * @param {string} params.passwordHash  bcrypt hash
+ * @param {string} [params.id]  optional custom ID
+ * @returns {Promise<Object>} newly created user (no password hash)
  */
 export async function createUser({ name = null, email, passwordHash, id = null }) {
   const userId = id || `usr_${randomUUID()}`;
@@ -129,10 +139,10 @@ export async function createUser({ name = null, email, passwordHash, id = null }
 
   await db.execute({
     sql: `
-      INSERT INTO users (id, name, email, password_hash, created_at, updated_at)
-      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO users (id, Name, Email, Passw, password_hash, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
-    args: [userId, sanitizedName, normalizedEmail, passwordHash],
+    args: [userId, sanitizedName, normalizedEmail, passwordHash, passwordHash],
   });
 
   return {
