@@ -164,11 +164,18 @@ body {
   gap: 8px;
   text-decoration: none;
   color: inherit;
+  perspective: 1000px;
 }
 
 .brand-glyph {
   font-size: 18px;
   line-height: 1;
+  display: inline-block;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-brand:hover .brand-glyph {
+  transform: rotateY(360deg);
 }
 
 .brand-name {
@@ -176,6 +183,18 @@ body {
   font-weight: 900;
   color: #ffffff;
   letter-spacing: 0.05em;
+  display: inline-block;
+}
+
+.brand-name span {
+  display: inline-block;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.nav-brand:hover .brand-name span {
+  transform: rotateY(360deg);
 }
 
 .nav-status-dot {
@@ -197,21 +216,69 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+/* ==========================================================================
+   ⚡ NAVBAR HOVER ANIMATION — Slide-Up Fill + 3D Y-Axis Flip
+   Inspired by Ephraim Sangma's social icon hover effect
+   ========================================================================== */
+
+/* Base setup for nav item — position relative for the ::before layer,
+   overflow hidden to clip the sliding fill, perspective for 3D depth */
 .nav-item {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
   text-decoration: none;
   padding: 6px 14px;
   border-radius: var(--radius-pill);
-  transition: all var(--transition-fast);
+  perspective: 1000px;
+  z-index: 1;
+  transition: color 0.3s ease;
 }
 
+/* Slide-up background layer — initially hidden below the button */
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  border-radius: var(--radius-pill);
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+/* Inner text span — this is what flips in 3D on Y-axis */
+.nav-item span {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* HOVER STATE: Slide background up + Rotate text 360° on Y-axis */
 .nav-item:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.06);
 }
 
+.nav-item:hover::before {
+  top: 0;
+}
+
+.nav-item:hover span {
+  transform: rotateY(360deg);
+  color: #ffffff;
+}
+
+/* Active state (currently viewed section) */
 .nav-item.active {
   color: #ffffff;
   background: var(--bg-surface-elevated);
@@ -219,15 +286,24 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+.nav-item.active::before {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
 }
 
+/* ==========================================================================
+   Authorize Extension Button — same slide-up + flip effect
+   ========================================================================== */
 .nav-btn-auth {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   padding: 8px 16px;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, var(--accent-cyan), #2563eb);
@@ -236,13 +312,48 @@ body {
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  perspective: 1000px;
+  z-index: 1;
+  transition: box-shadow var(--transition-normal);
   box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
 }
 
+/* Slide-up overlay layer (darker gradient for contrast on hover) */
+.nav-btn-auth::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0284c7, #1e3a8a);
+  border-radius: var(--radius-pill);
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+/* Inner wrapper — flips in 3D */
+.nav-btn-auth .btn-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
 .nav-btn-auth:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+  box-shadow: 0 8px 25px rgba(56, 189, 248, 0.55);
+}
+
+.nav-btn-auth:hover::before {
+  top: 0;
+}
+
+.nav-btn-auth:hover .btn-inner {
+  transform: rotateY(360deg);
 }
 
 /* ==========================================================================
