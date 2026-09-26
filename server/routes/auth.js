@@ -2,8 +2,8 @@
  * Authentication Route Handlers: /signup, /login, and VS Code Deep Link Redirection
  */
 import { Router } from 'express';
-import { findUserByEmail, createUser } from '../db.js';
-import { hashPassword, verifyPassword, generateToken, buildCallbackUrl } from '../utils/auth.js';
+import { findUserByEmail, createUser, findUserById } from '../db.js';
+import { hashPassword, verifyPassword, generateToken, verifyToken, buildCallbackUrl, buildVsCodeRollbackUrl } from '../utils/auth.js';
 
 const router = Router();
 
@@ -43,20 +43,18 @@ function isJsonRequest(req) {
 }
 
 /**
- * Resolves the final redirect URL (if any) for deep linking.
+ * Resolves the final redirect URL for deep linking.
+ * Defaults to the official Tursiops VS Code rollback link per the authenticated user's email:
+ * vscode://tursiops-ai.tursiops/auth?token=<token>&email=<email>
  */
-function resolveRedirectUrl(req, token, user) {
+export function resolveRedirectUrl(req, token, user) {
   const redirectUri = getRedirectUri(req);
   if (redirectUri) {
     return buildCallbackUrl(redirectUri, token, { email: user.email });
   }
 
-  const redirectParam = getRedirectParam(req);
-  if (redirectParam === 'vscode') {
-    return `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${encodeURIComponent(user.email)}`;
-  }
-
-  return null;
+  // Always generate the VS Code rollback link using authenticated user's email
+  return buildVsCodeRollbackUrl(token, user.email);
 }
 
 /**
@@ -177,9 +175,10 @@ router.post(['/signup', '/api/signup'], async (req, res, next) => {
 
     // 6. Handle Response / Deep Link Redirection
     const redirectUrl = resolveRedirectUrl(req, token, newUser);
+    const vscodeLink = buildVsCodeRollbackUrl(token, newUser.email);
 
     if (isJsonRequest(req)) {
-      const responsePayload = {
+      return res.status(201).json({
         success: true,
         message: 'Account created successfully',
         token,
@@ -188,11 +187,9 @@ router.post(['/signup', '/api/signup'], async (req, res, next) => {
           name: newUser.name,
           email: newUser.email,
         },
-      };
-      if (redirectUrl) {
-        responsePayload.redirect_url = redirectUrl;
-      }
-      return res.status(201).json(responsePayload);
+        redirect_url: redirectUrl,
+        vscode_link: vscodeLink,
+      });
     }
 
     if (redirectUrl) {
@@ -210,6 +207,8 @@ router.post(['/signup', '/api/signup'], async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
       },
+      redirect_url: redirectUrl,
+      vscode_link: vscodeLink,
     });
   } catch (error) {
     next(error);
@@ -283,9 +282,10 @@ router.post(['/login', '/signin', '/api/login', '/api/signin'], async (req, res,
 
     // 5. Handle Response / Deep Link Redirection
     const redirectUrl = resolveRedirectUrl(req, token, user);
+    const vscodeLink = buildVsCodeRollbackUrl(token, user.email);
 
     if (isJsonRequest(req)) {
-      const responsePayload = {
+      return res.status(200).json({
         success: true,
         message: 'Authenticated successfully',
         token,
@@ -294,11 +294,9 @@ router.post(['/login', '/signin', '/api/login', '/api/signin'], async (req, res,
           name: user.name,
           email: user.email,
         },
-      };
-      if (redirectUrl) {
-        responsePayload.redirect_url = redirectUrl;
-      }
-      return res.status(200).json(responsePayload);
+        redirect_url: redirectUrl,
+        vscode_link: vscodeLink,
+      });
     }
 
     if (redirectUrl) {
@@ -316,9 +314,43 @@ router.post(['/login', '/signin', '/api/login', '/api/signin'], async (req, res,
         name: user.name,
         email: user.email,
       },
+      redirect_url: redirectUrl,
+      vscode_link: vscodeLink,
     });
   } catch (error) {
     next(error);
+  }
+});
+
+/**
+ * -------------------------------------------------------------------------
+ * GET /api/vscode-link
+ * Returns the official VS Code extension rollback link for the authenticated user.
+ * -------------------------------------------------------------------------
+ */
+router.get(['/vscode-link', '/api/vscode-link', '/api/auth/vscode-link'], async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized', message: 'Missing Authorization header' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = verifyToken(token);
+    const user = await findUserById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User Not Found', message: 'User does not exist in database' });
+    }
+
+    const rollbackUrl = buildVsCodeRollbackUrl(token, user.email);
+    return res.json({
+      success: true,
+      email: user.email,
+      vscode_link: rollbackUrl,
+      redirect_url: rollbackUrl,
+    });
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized', message: 'Invalid or expired token' });
   }
 });
 
@@ -404,8 +436,17 @@ function renderAuthPage({ mode, redirectUri, error, name, email }) {
         <label for="confirmPassword">Confirm Password</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••••••">
       </div>` : ''}
-      <button type="submit" class="btn-submit">${isLogin ? 'Sign In' : 'Sign Up'}</button>
+      <button type="submit" class="btn-submit">${isLogin ? 'Sign In' : 'Create Account'}</button>
     </form>
+    <div class="auth-action-divider doto-font">
+      <span>VS CODE EXTENSION ACTION</span>
+    </div>
+    <a href="#" class="btn btn-block btn-open-vscode locked doto-font" aria-disabled="true" style="text-align: center; text-decoration: none; justify-content: center;">
+      <span>🔒</span> <span>OPEN IN VS CODE (${isLogin ? 'SIGN IN FIRST' : 'CREATE ACCOUNT FIRST'})</span>
+    </a>
+    <div class="vscode-unlock-hint doto-font" style="margin-top: 6px;">
+      &gt; Complete ${isLogin ? 'sign in' : 'account creation'} above to unlock VS Code integration.
+    </div>
     <div style="text-align: center; margin-top: 16px; font-size: 13px;">
       <a href="${toggleUrl}" style="color: #38bdf8; text-decoration: none;">${toggleText}</a>
     </div>

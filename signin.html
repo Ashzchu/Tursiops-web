@@ -87,6 +87,8 @@
 
     <!-- Form -->
     <form id="standaloneAuthForm" action="/login" method="POST">
+      <div id="activeSessionContainer"></div>
+
       <div class="form-group">
         <label for="signinEmail" class="doto-font">Developer Email</label>
         <input type="email" id="signinEmail" name="email" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
@@ -98,9 +100,22 @@
       </div>
 
       <button type="submit" class="btn btn-primary btn-block doto-font" id="btnSignInSubmit" style="margin-top:16px;">
-        <span id="signInSubmitText">AUTHORIZE &amp; RETURN TO VS CODE</span>
+        <span id="signInSubmitText">SIGN IN</span>
       </button>
     </form>
+
+    <!-- Separate VS Code Integration Button -->
+    <div class="auth-action-divider doto-font">
+      <span>VS CODE EXTENSION ACTION</span>
+    </div>
+
+    <a href="#" class="btn btn-block btn-open-vscode locked doto-font" id="btnSignInOpenVsCode" aria-disabled="true" role="button">
+      <span class="btn-icon" id="signInVsCodeIcon">🔒</span>
+      <span class="btn-label" id="signInVsCodeLabel">OPEN IN VS CODE (SIGN IN FIRST)</span>
+    </a>
+    <div class="vscode-unlock-hint doto-font" id="signInUnlockHint">
+      &gt; Complete sign in above to unlock VS Code integration.
+    </div>
 
     <div class="trust-line-notice doto-font">
       &gt; Your data stays local. This sign-in is only for AI-assisted changes — no cloud account otherwise.
@@ -134,7 +149,79 @@
       const form = document.getElementById('standaloneAuthForm');
       const alertBox = document.getElementById('authAlertBox');
       const btnSubmit = document.getElementById('btnSignInSubmit');
+      const btnVsCode = document.getElementById('btnSignInOpenVsCode');
+      const vsCodeIcon = document.getElementById('signInVsCodeIcon');
+      const vsCodeLabel = document.getElementById('signInVsCodeLabel');
+      const unlockHint = document.getElementById('signInUnlockHint');
+      const activeSessionContainer = document.getElementById('activeSessionContainer');
 
+      function unlockVsCodeButton(rollbackUrl, email) {
+        btnVsCode.classList.remove('locked');
+        btnVsCode.classList.add('unlocked');
+        btnVsCode.removeAttribute('aria-disabled');
+        btnVsCode.href = rollbackUrl;
+        vsCodeIcon.textContent = '🐬';
+        vsCodeLabel.textContent = 'OPEN IN VS CODE';
+        unlockHint.className = 'vscode-unlock-hint unlocked doto-font';
+        unlockHint.textContent = `✓ Unlocked for ${email}! Click above to return to VS Code.`;
+      }
+
+      function lockVsCodeButton() {
+        btnVsCode.classList.remove('unlocked');
+        btnVsCode.classList.add('locked');
+        btnVsCode.setAttribute('aria-disabled', 'true');
+        btnVsCode.href = '#';
+        vsCodeIcon.textContent = '🔒';
+        vsCodeLabel.textContent = 'OPEN IN VS CODE (SIGN IN FIRST)';
+        unlockHint.className = 'vscode-unlock-hint doto-font';
+        unlockHint.textContent = '> Complete sign in above to unlock VS Code integration.';
+      }
+
+      // Check existing session in localStorage
+      const storedToken = localStorage.getItem('tursiops_token');
+      if (storedToken) {
+        fetch('/api/me', {
+          headers: { 'Authorization': `Bearer ${storedToken}` }
+        })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.valid && data.user) {
+            const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(storedToken)}&email=${encodeURIComponent(data.user.email)}`;
+            unlockVsCodeButton(rollbackUrl, data.user.email);
+            
+            activeSessionContainer.innerHTML = `
+              <div class="active-session-badge doto-font">
+                <span>✓ Active session: <strong>${data.user.email}</strong></span>
+                <a id="btnSwitchAccount">Switch Account</a>
+              </div>
+            `;
+            document.getElementById('btnSwitchAccount')?.addEventListener('click', (e) => {
+              e.preventDefault();
+              localStorage.removeItem('tursiops_token');
+              activeSessionContainer.innerHTML = '';
+              lockVsCodeButton();
+              form.reset();
+              alertBox.style.display = 'none';
+            });
+          }
+        })
+        .catch(() => {});
+      }
+
+      // Handle click on VS Code button
+      btnVsCode.addEventListener('click', (e) => {
+        if (btnVsCode.classList.contains('locked')) {
+          e.preventDefault();
+          btnVsCode.classList.remove('shake');
+          void btnVsCode.offsetWidth; // trigger reflow
+          btnVsCode.classList.add('shake');
+          alertBox.textContent = 'Please sign in first to unlock VS Code integration.';
+          alertBox.className = 'auth-alert-box error';
+          alertBox.style.display = 'block';
+        }
+      });
+
+      // Handle sign in form submission
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         alertBox.textContent = '';
@@ -147,18 +234,18 @@
         if (!email || !email.includes('@')) {
           alertBox.textContent = 'Please enter a valid email address.';
           alertBox.className = 'auth-alert-box error';
-          alertBox.style.display = '';
+          alertBox.style.display = 'block';
           return;
         }
         if (!password || password.length < 8) {
           alertBox.textContent = 'Password must be at least 8 characters.';
           alertBox.className = 'auth-alert-box error';
-          alertBox.style.display = '';
+          alertBox.style.display = 'block';
           return;
         }
 
         btnSubmit.disabled = true;
-        document.getElementById('signInSubmitText').textContent = 'AUTHORIZING...';
+        document.getElementById('signInSubmitText').textContent = 'SIGNING IN...';
 
         try {
           const body = { email, password };
@@ -184,40 +271,28 @@
           }
 
           if (data.token) {
-            // TODO: move to httpOnly cookie in production
             localStorage.setItem('tursiops_token', data.token);
           }
 
-          alertBox.textContent = '✓ Authorized! Returning to VS Code...';
-          alertBox.className = 'auth-alert-box success';
-          alertBox.style.display = '';
+          const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(data.user?.email || email)}`;
 
-          if (data.redirect_url) {
-            btnSubmit.style.display = 'none';
-            let fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
-            if (!fallbackBtn) {
-              fallbackBtn = document.createElement('a');
-              fallbackBtn.id = 'btnOpenVsCodeFallback';
-              fallbackBtn.className = 'btn btn-primary btn-block doto-font';
-              fallbackBtn.style.textAlign = 'center';
-              fallbackBtn.style.textDecoration = 'none';
-              fallbackBtn.style.display = 'block';
-              fallbackBtn.style.marginTop = '16px';
-              fallbackBtn.textContent = 'OPEN IN VS CODE';
-              btnSubmit.parentNode.appendChild(fallbackBtn);
-            }
-            fallbackBtn.href = data.redirect_url;
-            window.location.href = data.redirect_url;
-          } else {
-            setTimeout(() => { window.location.href = '/landing'; }, 1000);
-          }
+          // Unlock the VS Code button immediately
+          unlockVsCodeButton(rollbackUrl, data.user?.email || email);
+
+          document.getElementById('signInSubmitText').textContent = '✓ SIGNED IN';
+          alertBox.textContent = '✓ Sign-in successful! VS Code integration unlocked.';
+          alertBox.className = 'auth-alert-box success';
+          alertBox.style.display = 'block';
+
+          // Automatically trigger redirect to VS Code
+          window.location.href = rollbackUrl;
+
         } catch (err) {
           alertBox.textContent = err.message || 'Sign in failed. Check your email and password.';
           alertBox.className = 'auth-alert-box error';
-          alertBox.style.display = '';
-        } finally {
+          alertBox.style.display = 'block';
           btnSubmit.disabled = false;
-          document.getElementById('signInSubmitText').textContent = 'AUTHORIZE & RETURN TO VS CODE';
+          document.getElementById('signInSubmitText').textContent = 'SIGN IN';
         }
       });
     });

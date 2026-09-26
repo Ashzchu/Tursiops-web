@@ -116,3 +116,17 @@ export function buildCallbackUrl(redirectUri, token, extraParams = {}) {
     return parsed.toString();
   }
 }
+
+/**
+ * Constructs the official Tursiops VS Code extension rollback link.
+ * Format: vscode://tursiops-ai.tursiops/auth?token=<token>&email=<email>
+ * 
+ * @param {string} token - Signed JWT token
+ * @param {string} email - Authenticated user email from Turso DB
+ * @returns {string} Fully formatted deep link
+ */
+export function buildVsCodeRollbackUrl(token, email) {
+  if (!token) throw new Error('token is required to build VS Code rollback URL');
+  const safeEmail = email ? encodeURIComponent(email.trim()) : '';
+  return `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${safeEmail}`;
+}

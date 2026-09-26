@@ -100,6 +100,12 @@ function initPortalApp() {
   const modalSpinner = document.getElementById('modalSpinner');
   const authAlertBox = document.getElementById('authAlertBox');
 
+  const btnModalOpenVsCode = document.getElementById('btnModalOpenVsCode');
+  const modalVsCodeIcon = document.getElementById('modalVsCodeIcon');
+  const modalVsCodeLabel = document.getElementById('modalVsCodeLabel');
+  const modalUnlockHint = document.getElementById('modalUnlockHint');
+  const modalActiveSessionContainer = document.getElementById('modalActiveSessionContainer');
+
   const deepLinkBanner = document.getElementById('deepLinkBanner');
   const deepLinkTarget = document.getElementById('deepLinkTarget');
 
@@ -123,6 +129,91 @@ function initPortalApp() {
     openModal('signup');
   } else if (pathname === '/signin' || pathname === '/login' || modeParam === 'signin' || modeParam === 'login' || target) {
     openModal('login');
+  }
+
+  function unlockModalVsCodeButton(rollbackUrl, email) {
+    if (!btnModalOpenVsCode) return;
+    btnModalOpenVsCode.classList.remove('locked');
+    btnModalOpenVsCode.classList.add('unlocked');
+    btnModalOpenVsCode.removeAttribute('aria-disabled');
+    btnModalOpenVsCode.href = rollbackUrl;
+    if (modalVsCodeIcon) modalVsCodeIcon.textContent = '🐬';
+    if (modalVsCodeLabel) modalVsCodeLabel.textContent = 'OPEN IN VS CODE';
+    if (modalUnlockHint) {
+      modalUnlockHint.className = 'vscode-unlock-hint unlocked doto-font';
+      modalUnlockHint.textContent = `✓ Unlocked for ${email}! Click above to return to VS Code.`;
+    }
+  }
+
+  function lockModalVsCodeButton() {
+    if (!btnModalOpenVsCode) return;
+    btnModalOpenVsCode.classList.remove('unlocked');
+    btnModalOpenVsCode.classList.add('locked');
+    btnModalOpenVsCode.setAttribute('aria-disabled', 'true');
+    btnModalOpenVsCode.href = '#';
+    if (modalVsCodeIcon) modalVsCodeIcon.textContent = '🔒';
+    if (modalVsCodeLabel) {
+      modalVsCodeLabel.textContent = mode === 'signup' 
+        ? 'OPEN IN VS CODE (CREATE ACCOUNT FIRST)' 
+        : 'OPEN IN VS CODE (SIGN IN FIRST)';
+    }
+    if (modalUnlockHint) {
+      modalUnlockHint.className = 'vscode-unlock-hint doto-font';
+      modalUnlockHint.textContent = mode === 'signup'
+        ? '> Complete account creation above to unlock VS Code integration.'
+        : '> Complete sign in above to unlock VS Code integration.';
+    }
+  }
+
+  // Check stored session in localStorage
+  function checkStoredSession() {
+    const storedToken = localStorage.getItem('tursiops_token');
+    if (!storedToken) return;
+
+    fetch('/api/me', {
+      headers: { 'Authorization': `Bearer ${storedToken}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      if (data && data.valid && data.user) {
+        const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(storedToken)}&email=${encodeURIComponent(data.user.email)}`;
+        unlockModalVsCodeButton(rollbackUrl, data.user.email);
+
+        if (modalActiveSessionContainer) {
+          modalActiveSessionContainer.innerHTML = `
+            <div class="active-session-badge doto-font">
+              <span>✓ Active session: <strong>${data.user.email}</strong></span>
+              <a id="btnModalSwitchAccount">Switch Account</a>
+            </div>
+          `;
+          document.getElementById('btnModalSwitchAccount')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('tursiops_token');
+            modalActiveSessionContainer.innerHTML = '';
+            lockModalVsCodeButton();
+            popupAuthForm.reset();
+            clearAlert();
+          });
+        }
+      }
+    })
+    .catch(() => {});
+  }
+  checkStoredSession();
+
+  // Handle click on VS Code button inside modal
+  if (btnModalOpenVsCode) {
+    btnModalOpenVsCode.addEventListener('click', (e) => {
+      if (btnModalOpenVsCode.classList.contains('locked')) {
+        e.preventDefault();
+        btnModalOpenVsCode.classList.remove('shake');
+        void btnModalOpenVsCode.offsetWidth;
+        btnModalOpenVsCode.classList.add('shake');
+        showAlert(mode === 'signup' 
+          ? 'Please create an account first to unlock VS Code integration.' 
+          : 'Please sign in first to unlock VS Code integration.');
+      }
+    });
   }
 
   function openModal(initialMode = 'login') {
@@ -158,23 +249,29 @@ function initPortalApp() {
     mode = newMode;
     clearAlert();
     btnModalSubmit.style.display = '';
-    const fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
-    if (fallbackBtn) fallbackBtn.remove();
 
     if (mode === 'signup') {
       modalTabSignUp.classList.add('active');
       modalTabSignIn.classList.remove('active');
       modalHeading.textContent = 'CREATE EXTENSION ACCOUNT';
-      modalSubmitText.textContent = 'CREATE ACCOUNT & RETURN TO VS CODE';
+      modalSubmitText.textContent = 'CREATE ACCOUNT';
       groupName.style.display = 'block';
       groupConfirmPassword.style.display = 'block';
+      if (btnModalOpenVsCode && btnModalOpenVsCode.classList.contains('locked')) {
+        if (modalVsCodeLabel) modalVsCodeLabel.textContent = 'OPEN IN VS CODE (CREATE ACCOUNT FIRST)';
+        if (modalUnlockHint) modalUnlockHint.textContent = '> Complete account creation above to unlock VS Code integration.';
+      }
     } else {
       modalTabSignIn.classList.add('active');
       modalTabSignUp.classList.remove('active');
       modalHeading.textContent = 'AUTHORIZE VS CODE EXTENSION';
-      modalSubmitText.textContent = 'AUTHORIZE & RETURN TO VS CODE';
+      modalSubmitText.textContent = 'SIGN IN';
       groupName.style.display = 'none';
       groupConfirmPassword.style.display = 'none';
+      if (btnModalOpenVsCode && btnModalOpenVsCode.classList.contains('locked')) {
+        if (modalVsCodeLabel) modalVsCodeLabel.textContent = 'OPEN IN VS CODE (SIGN IN FIRST)';
+        if (modalUnlockHint) modalUnlockHint.textContent = '> Complete sign in above to unlock VS Code integration.';
+      }
     }
   }
 
@@ -184,6 +281,7 @@ function initPortalApp() {
   function showAlert(msg, isError = true) {
     authAlertBox.textContent = msg;
     authAlertBox.className = `auth-alert-box ${isError ? 'error' : 'success'}`;
+    authAlertBox.style.display = 'block';
   }
 
   function clearAlert() {
@@ -216,6 +314,7 @@ function initPortalApp() {
 
     btnModalSubmit.disabled = true;
     modalSpinner.style.display = 'inline-block';
+    modalSubmitText.textContent = mode === 'signup' ? 'CREATING...' : 'SIGNING IN...';
 
     try {
       const endpoint = mode === 'signup' ? '/api/signup' : '/api/login';
@@ -246,38 +345,27 @@ function initPortalApp() {
         localStorage.setItem('tursiops_token', data.token);
       }
 
-      showToast(mode === 'signup' ? '✓ Account created! Redirecting...' : '✓ Authorized for VS Code!');
+      const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(data.user?.email || email)}`;
 
-      if (data.redirect_url) {
-        showAlert('✓ Authorized! Returning to VS Code...', false);
-        btnModalSubmit.style.display = 'none';
+      unlockModalVsCodeButton(rollbackUrl, data.user?.email || email);
 
-        let fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
-        if (!fallbackBtn) {
-          fallbackBtn = document.createElement('a');
-          fallbackBtn.id = 'btnOpenVsCodeFallback';
-          fallbackBtn.className = 'btn btn-primary btn-block doto-font';
-          fallbackBtn.style.textAlign = 'center';
-          fallbackBtn.style.textDecoration = 'none';
-          fallbackBtn.style.display = 'block';
-          fallbackBtn.style.marginTop = '16px';
-          fallbackBtn.textContent = 'OPEN IN VS CODE';
-          btnModalSubmit.parentNode.appendChild(fallbackBtn);
-        }
-        fallbackBtn.href = data.redirect_url;
+      modalSubmitText.textContent = mode === 'signup' ? '✓ ACCOUNT CREATED' : '✓ SIGNED IN';
+      showAlert(mode === 'signup' 
+        ? '✓ Account created! VS Code integration unlocked.' 
+        : '✓ Sign-in successful! VS Code integration unlocked.', false);
 
-        // Immediately trigger deep link navigation
-        window.location.href = data.redirect_url;
-      } else {
-        closeModal();
-        popupAuthForm.reset();
-        setTimeout(() => { window.location.href = '/landing'; }, 1000);
-      }
+      showToast(mode === 'signup' ? '✓ Account created! Redirecting to VS Code...' : '✓ Authorized for VS Code!');
+
+      // Automatically trigger deep link navigation
+      window.location.href = rollbackUrl;
+
     } catch (err) {
       showAlert(err.message || 'Error processing request.');
-    } finally {
       btnModalSubmit.disabled = false;
+      modalSubmitText.textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN';
+    } finally {
       modalSpinner.style.display = 'none';
     }
   });
 }
+

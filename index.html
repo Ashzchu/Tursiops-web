@@ -298,6 +298,8 @@
 
       <!-- Form -->
       <form id="popupAuthForm" autocomplete="on">
+        <div id="modalActiveSessionContainer"></div>
+
         <div class="form-group" id="groupName" style="display: none;">
           <label for="modalName" class="doto-font">Developer Name</label>
           <input type="text" id="modalName" class="form-input" placeholder="Ashzchu" autocomplete="name">
@@ -320,9 +322,22 @@
 
         <button type="submit" class="btn btn-primary btn-block doto-font" id="btnModalSubmit">
           <span id="modalSpinner" style="display: none;">⏳ </span>
-          <span id="modalSubmitText">AUTHORIZE &amp; RETURN TO VS CODE</span>
+          <span id="modalSubmitText">SIGN IN</span>
         </button>
       </form>
+
+      <!-- Separate VS Code Integration Button -->
+      <div class="auth-action-divider doto-font">
+        <span>VS CODE EXTENSION ACTION</span>
+      </div>
+
+      <a href="#" class="btn btn-block btn-open-vscode locked doto-font" id="btnModalOpenVsCode" aria-disabled="true" role="button">
+        <span class="btn-icon" id="modalVsCodeIcon">🔒</span>
+        <span class="btn-label" id="modalVsCodeLabel">OPEN IN VS CODE (SIGN IN FIRST)</span>
+      </a>
+      <div class="vscode-unlock-hint doto-font" id="modalUnlockHint">
+        &gt; Complete sign in above to unlock VS Code integration.
+      </div>
 
       <div class="trust-line-notice doto-font">
         &gt; Your data stays local. This sign-in is only for AI-assisted changes — no cloud account otherwise.

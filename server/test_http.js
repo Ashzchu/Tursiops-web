@@ -132,9 +132,9 @@ async function runHttpTests() {
     console.log('✓ Test 5 Passed: 302 HTTP Redirect generated for standard form submissions.');
 
     // -----------------------------------------------------------------------
-    // Test 6: POST /login without redirect_uri -> Standard JSON without redirect_url
+    // Test 6: POST /login without redirect_uri -> Returns vscode_link for user
     // -----------------------------------------------------------------------
-    console.log('\n--- TEST 6: POST /login without redirect_uri (JSON fallback) ---');
+    console.log('\n--- TEST 6: POST /login without redirect_uri (VS Code Deep Link generation) ---');
     const jsonLoginRes = await fetch(`${baseUrl}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -144,10 +144,14 @@ async function runHttpTests() {
     console.log(`Status: ${jsonLoginRes.status} (Expected: 200)`);
     const jsonData = await jsonLoginRes.json();
 
-    if (jsonLoginRes.status !== 200 || !jsonData.token || jsonData.redirect_url) {
-      throw new Error('Test 6 failed: Expected 200 JSON response without redirect_url');
+    const expectedDeepLinkPrefix = 'vscode://tursiops-ai.tursiops/auth?';
+    if (jsonLoginRes.status !== 200 || !jsonData.token || !jsonData.vscode_link || !jsonData.vscode_link.startsWith(expectedDeepLinkPrefix)) {
+      throw new Error(`Test 6 failed: Expected 200 JSON response with vscode_link, got: ${JSON.stringify(jsonData)}`);
     }
-    console.log('✓ Test 6 Passed: Standard web session JSON returned without redirect_url.');
+    if (!jsonData.vscode_link.includes(`email=${encodeURIComponent(testEmail.toLowerCase())}`)) {
+      throw new Error(`Test 6 failed: Expected vscode_link to contain encoded email ${testEmail}`);
+    }
+    console.log(`✓ Test 6 Passed: Dynamic VS Code rollback link generated: ${jsonData.vscode_link}`);
 
     // -----------------------------------------------------------------------
     // Test 7: POST /login with incorrect password -> 401 Unauthorized
@@ -181,6 +185,20 @@ async function runHttpTests() {
       throw new Error('Test 8 failed: Token verification failed');
     }
     console.log('✓ Test 8 Passed: User successfully verified with JWT.');
+
+    // -----------------------------------------------------------------------
+    // Test 8b: GET /api/vscode-link with Bearer token
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 8b: GET /api/vscode-link with Bearer token ---');
+    const vsLinkRes = await fetch(`${baseUrl}/api/vscode-link`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Status: ${vsLinkRes.status} (Expected: 200)`);
+    const vsLinkData = await vsLinkRes.json();
+    if (vsLinkRes.status !== 200 || !vsLinkData.vscode_link?.includes('vscode://tursiops-ai.tursiops/auth?token=')) {
+      throw new Error(`Test 8b failed: Invalid response: ${JSON.stringify(vsLinkData)}`);
+    }
+    console.log(`✓ Test 8b Passed: Rollback link retrieved: ${vsLinkData.vscode_link}`);
 
     // -----------------------------------------------------------------------
     // Test 9: GET /health and /api/health -> 200 OK
