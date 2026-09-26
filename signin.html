@@ -169,7 +169,7 @@
           if (redirect) params.set('redirect', redirect);
           if (redirectUri) params.set('redirect_uri', redirectUri);
           const queryString = params.toString();
-          const fetchUrl = queryString ? `/login?${queryString}` : '/login';
+          const fetchUrl = queryString ? `/api/login?${queryString}` : '/api/login';
 
           const res = await fetch(fetchUrl, {
             method: 'POST',
@@ -193,9 +193,20 @@
           alertBox.style.display = '';
 
           if (data.redirect_url) {
-            if (data.redirect_url.startsWith('vscode:') || data.redirect_url.startsWith('cursor:')) {
-              alertBox.innerHTML = `✓ Authorized! Returning to VS Code...<br><a href="${data.redirect_url}" style="color:var(--neon-cyan);text-decoration:underline;display:inline-block;margin-top:6px;font-size:12px;">Click here if VS Code does not open automatically</a>`;
+            btnSubmit.style.display = 'none';
+            let fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
+            if (!fallbackBtn) {
+              fallbackBtn = document.createElement('a');
+              fallbackBtn.id = 'btnOpenVsCodeFallback';
+              fallbackBtn.className = 'btn btn-primary btn-block doto-font';
+              fallbackBtn.style.textAlign = 'center';
+              fallbackBtn.style.textDecoration = 'none';
+              fallbackBtn.style.display = 'block';
+              fallbackBtn.style.marginTop = '16px';
+              fallbackBtn.textContent = 'OPEN IN VS CODE';
+              btnSubmit.parentNode.appendChild(fallbackBtn);
             }
+            fallbackBtn.href = data.redirect_url;
             window.location.href = data.redirect_url;
           } else {
             setTimeout(() => { window.location.href = '/landing'; }, 1000);

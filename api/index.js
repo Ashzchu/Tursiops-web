@@ -1,11 +1,9 @@
 /**
  * Vercel Serverless Function
- * Re-exports the Express app so Vercel can route
- * API requests (POST /signup, POST /login, GET /api/me, etc.)
- * through the Express middleware stack.
- *
- * Note: env var startup validation is performed in server.js after dotenv.config()
+ * Handles API requests and routes through the Express application.
  */
 import app from '../server.js';
 
-export default app;
+export default function handler(req, res) {
+  return app(req, res);
+}

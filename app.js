@@ -157,6 +157,10 @@ function initPortalApp() {
   function setMode(newMode) {
     mode = newMode;
     clearAlert();
+    btnModalSubmit.style.display = '';
+    const fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
+    if (fallbackBtn) fallbackBtn.remove();
+
     if (mode === 'signup') {
       modalTabSignUp.classList.add('active');
       modalTabSignIn.classList.remove('active');
@@ -214,7 +218,7 @@ function initPortalApp() {
     modalSpinner.style.display = 'inline-block';
 
     try {
-      const endpoint = mode === 'signup' ? '/signup' : '/login';
+      const endpoint = mode === 'signup' ? '/api/signup' : '/api/login';
       const body = { email, password };
       if (mode === 'signup') body.name = name || undefined;
       if (redirect) body.redirect = redirect;
@@ -243,11 +247,31 @@ function initPortalApp() {
       }
 
       showToast(mode === 'signup' ? '✓ Account created! Redirecting...' : '✓ Authorized for VS Code!');
-      closeModal();
-      popupAuthForm.reset();
 
       if (data.redirect_url) {
+        showAlert('✓ Authorized! Returning to VS Code...', false);
+        btnModalSubmit.style.display = 'none';
+
+        let fallbackBtn = document.getElementById('btnOpenVsCodeFallback');
+        if (!fallbackBtn) {
+          fallbackBtn = document.createElement('a');
+          fallbackBtn.id = 'btnOpenVsCodeFallback';
+          fallbackBtn.className = 'btn btn-primary btn-block doto-font';
+          fallbackBtn.style.textAlign = 'center';
+          fallbackBtn.style.textDecoration = 'none';
+          fallbackBtn.style.display = 'block';
+          fallbackBtn.style.marginTop = '16px';
+          fallbackBtn.textContent = 'OPEN IN VS CODE';
+          btnModalSubmit.parentNode.appendChild(fallbackBtn);
+        }
+        fallbackBtn.href = data.redirect_url;
+
+        // Immediately trigger deep link navigation
         window.location.href = data.redirect_url;
+      } else {
+        closeModal();
+        popupAuthForm.reset();
+        setTimeout(() => { window.location.href = '/landing'; }, 1000);
       }
     } catch (err) {
       showAlert(err.message || 'Error processing request.');

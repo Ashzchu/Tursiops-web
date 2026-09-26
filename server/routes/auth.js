@@ -73,7 +73,7 @@ function isValidEmail(email) {
  * If redirect_uri is provided, executes an HTTP 302 redirect to the IDE deep link.
  * -------------------------------------------------------------------------
  */
-router.post('/signup', async (req, res, next) => {
+router.post(['/signup', '/api/signup'], async (req, res, next) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
     const redirectUri = getRedirectUri(req);
@@ -223,7 +223,7 @@ router.post('/signup', async (req, res, next) => {
  * If redirect_uri is provided, executes an HTTP 302 redirect to the IDE deep link.
  * -------------------------------------------------------------------------
  */
-router.post('/login', async (req, res, next) => {
+router.post(['/login', '/signin', '/api/login', '/api/signin'], async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const redirectUri = getRedirectUri(req);
@@ -327,7 +327,7 @@ router.post('/login', async (req, res, next) => {
  * GET /login & GET /signup
  * -------------------------------------------------------------------------
  */
-router.get('/login', (req, res) => {
+router.get(['/login', '/signin', '/api/login', '/api/signin'], (req, res) => {
   const redirectUri = getRedirectUri(req);
   res.send(renderAuthPage({
     mode: 'login',
@@ -336,7 +336,7 @@ router.get('/login', (req, res) => {
   }));
 });
 
-router.get('/signup', (req, res) => {
+router.get(['/signup', '/api/signup'], (req, res) => {
   const redirectUri = getRedirectUri(req);
   res.send(renderAuthPage({
     mode: 'signup',

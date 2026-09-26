@@ -3,30 +3,13 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/api", "destination": "/api/index.js" },
+    { "source": "/health", "destination": "/api/index.js" },
     { "source": "/landing", "destination": "/landing.html" },
     { "source": "/signup", "destination": "/signup.html" },
     { "source": "/signin", "destination": "/signin.html" },
-    { "source": "/login", "destination": "/signin.html" }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/(signup|login)",
-      "methods": ["POST"],
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/api/auth/(.*)",
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "methods": ["POST", "PUT", "PATCH", "DELETE"],
-      "dest": "/api/index.js"
-    }
+    { "source": "/login", "destination": "/signin.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
