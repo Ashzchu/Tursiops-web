@@ -25,6 +25,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Lazy DB initialization middleware
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbReady();
+  } catch (err) {
+    console.error('[DB INIT WARNING]', err.message);
+  }
+  next();
+});
+
 // Serve frontend static landing page files (index.html, style.css, app.js)
 app.use(express.static(__dirname));
 
@@ -154,11 +164,24 @@ app.post('/api/gemini-key', async (req, res) => {
 /**
  * Health check endpoint
  */
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  let dbStatus = 'disconnected';
+  try {
+    const { db } = await import('./server/db.js');
+    await db.execute('SELECT 1');
+    dbStatus = 'connected';
+  } catch (err) {
+    dbStatus = `error: ${err.message}`;
+  }
+
   res.json({
     status: 'ok',
     service: 'tursiops-auth-server',
-    turso: 'connected',
+    turso: dbStatus,
+    env: {
+      has_db_url: Boolean(process.env.TURSO_DATABASE_URL),
+      has_auth_token: Boolean(process.env.TURSO_AUTH_TOKEN),
+    },
     timestamp: new Date().toISOString(),
   });
 });

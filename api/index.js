@@ -1,13 +1,7 @@
 /**
  * Vercel Serverless Function entrypoint
  */
-import app, { ensureDbReady } from '../server.js';
+import app from '../server.js';
 
-export default async function handler(req, res) {
-  try {
-    await ensureDbReady();
-  } catch (err) {
-    console.error('[VERCEL INIT ERROR]', err);
-  }
-  return app(req, res);
-}
+export default app;
+
