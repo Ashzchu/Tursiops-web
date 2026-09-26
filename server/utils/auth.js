@@ -33,21 +33,28 @@ export async function verifyPassword(password, hash) {
   if (!password || !hash) {
     return false;
   }
-  return await bcrypt.compare(password, hash);
+  if (typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$'))) {
+    return await bcrypt.compare(password, hash);
+  }
+  return password === hash;
 }
 
 /**
  * Generates a signed JSON Web Token (JWT) for an authenticated user.
  * @param {Object} user
+ * @param {string|number} [user.s_no]
  * @param {string} user.id
  * @param {string} user.email
+ * @param {string} [user.name]
  * @returns {string} signed JWT token
  */
 export function generateToken(user) {
   const payload = {
-    sub: user.id,
-    id: user.id,
+    sub: user.id || String(user.s_no),
+    id: user.id || String(user.s_no),
+    s_no: user.s_no,
     email: user.email,
+    name: user.name || null,
     iss: 'tursiops-auth',
   };
 

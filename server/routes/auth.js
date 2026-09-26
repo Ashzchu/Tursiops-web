@@ -143,6 +143,7 @@ router.post('/signup', async (req, res, next) => {
       message: 'Account created successfully',
       token,
       user: {
+        s_no: newUser.s_no,
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
@@ -198,8 +199,8 @@ router.post('/login', async (req, res, next) => {
       });
     }
 
-    // 3. Verify Password against stored bcrypt hash
-    const isPasswordValid = await verifyPassword(password, user.password_hash);
+    // 3. Verify Password against stored bcrypt hash or password
+    const isPasswordValid = await verifyPassword(password, user.passw || user.password_hash);
     if (!isPasswordValid) {
       if (req.accepts('html') && !req.xhr && !req.is('json')) {
         return res.status(401).send(renderAuthPage({
@@ -231,6 +232,7 @@ router.post('/login', async (req, res, next) => {
       message: 'Authenticated successfully',
       token,
       user: {
+        s_no: user.s_no,
         id: user.id,
         name: user.name,
         email: user.email,
