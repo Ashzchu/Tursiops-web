@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — Tursiops VS Code Extension Authorization</title>
+  <meta name="description" content="Create a developer account for Tursiops VS Code Extension.">
+  
+  <!-- Fonts: Doto (Dot-Matrix Display), Inter (Body), Fira Code (Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .auth-page-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <div class="ambient-glow glow-top" aria-hidden="true"></div>
+  <div class="cyber-grid-overlay" aria-hidden="true"></div>
+
+  <!-- FLOATING HOVER NAVIGATION BAR -->
+  <header class="floating-header-wrapper">
+    <nav class="floating-nav-bar" aria-label="Main Navigation">
+      <a href="/" class="nav-brand">
+        <span class="brand-glyph">🐬</span>
+        <span class="brand-name doto-font">TURSIOPS</span>
+      </a>
+
+      <div class="nav-menu-links">
+        <a href="/landing#how-it-works" class="nav-item doto-font">HOW IT WORKS</a>
+        <a href="/landing#features" class="nav-item doto-font">FEATURES</a>
+        <a href="/landing#security" class="nav-item doto-font">SECURITY</a>
+        <a href="/landing#manual" class="nav-item doto-font">USER MANUAL</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/signin" class="nav-btn-auth doto-font" style="text-decoration:none;">
+          <span>SIGN IN</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- DEDICATED SIGN UP CARD -->
+  <div class="auth-page-card">
+    <div class="modal-brand">
+      <span class="modal-glyph">🐬</span>
+      <h3 class="modal-title doto-font">CREATE EXTENSION ACCOUNT</h3>
+    </div>
+
+    <div class="micro-copy-notice doto-font">
+      &gt; Signing in from the Tursiops extension. You’ll be sent back to VS Code once you continue.
+    </div>
+
+    <div class="auth-tabs">
+      <a href="/signin" class="auth-tab-btn doto-font" style="text-decoration:none; text-align:center;">SIGN IN</a>
+      <a href="/signup" class="auth-tab-btn active doto-font" style="text-decoration:none; text-align:center;">CREATE ACCOUNT</a>
+    </div>
+
+    <!-- Deep link notification banner if redirect_uri is in URL -->
+    <div class="deep-link-banner doto-font" id="deepLinkBanner" style="display: none;">
+      <span>VS Code Callback Target: </span><span id="deepLinkTarget"></span>
+    </div>
+
+    <!-- Alert Box -->
+    <div class="auth-alert-box" id="authAlertBox"></div>
+
+    <!-- Form -->
+    <form id="standaloneSignUpForm" action="/signup" method="POST">
+      <div class="form-group">
+        <label for="signupName" class="doto-font">Developer Name</label>
+        <input type="text" id="signupName" name="name" class="form-input" placeholder="Ashzchu" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label for="signupEmail" class="doto-font">Developer Email</label>
+        <input type="email" id="signupEmail" name="email" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="signupPassword" class="doto-font">Password / Vault Key</label>
+        <input type="password" id="signupPassword" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+      </div>
+
+      <div class="form-group">
+        <label for="signupConfirmPassword" class="doto-font">Confirm Password</label>
+        <input type="password" id="signupConfirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block doto-font" id="btnSignUpSubmit" style="margin-top:16px;">
+        <span id="signUpSubmitText">CREATE ACCOUNT &amp; RETURN TO VS CODE</span>
+      </button>
+    </form>
+
+    <div class="trust-line-notice doto-font">
+      &gt; Your data stays local. This sign-in is only for AI-assisted changes — no cloud account otherwise.
+    </div>
+  </div>
+
+  <div class="toast doto-font" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUri = urlParams.get('redirect_uri');
+      const deepLinkBanner = document.getElementById('deepLinkBanner');
+      const deepLinkTarget = document.getElementById('deepLinkTarget');
+
+      if (redirectUri && deepLinkBanner && deepLinkTarget) {
+        deepLinkBanner.style.display = 'block';
+        deepLinkTarget.textContent = redirectUri;
+      }
+
+      const form = document.getElementById('standaloneSignUpForm');
+      const alertBox = document.getElementById('authAlertBox');
+      const btnSubmit = document.getElementById('btnSignUpSubmit');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+
+        const name = document.getElementById('signupName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+        if (!email || !password) {
+          alertBox.textContent = 'Please fill in required fields.';
+          alertBox.className = 'auth-alert-box error';
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          alertBox.textContent = 'Passwords do not match.';
+          alertBox.className = 'auth-alert-box error';
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'CREATING ACCOUNT...';
+
+        try {
+          const body = { name, email, password, confirmPassword };
+          if (redirectUri) body.redirect_uri = redirectUri;
+
+          const res = await fetch('/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            throw new Error(data.message || 'Signup failed');
+          }
+
+          if (data.token) {
+            localStorage.setItem('tursiops_token', data.token);
+          }
+
+          alertBox.textContent = '✓ Account created! Returning to VS Code...';
+          alertBox.className = 'auth-alert-box success';
+
+          if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+          } else {
+            setTimeout(() => { window.location.href = '/landing'; }, 1000);
+          }
+        } catch (err) {
+          alertBox.textContent = err.message || 'Error processing request.';
+          alertBox.className = 'auth-alert-box error';
+        } finally {
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'CREATE ACCOUNT & RETURN TO VS CODE';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,21 +1,10 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/login",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/signup",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index.js"
-    }
+    { "source": "/landing", "destination": "/index.html?mode=landing" },
+    { "source": "/signup", "destination": "/index.html?mode=signup" },
+    { "source": "/signin", "destination": "/index.html?mode=login" },
+    { "source": "/login", "destination": "/index.html?mode=login" },
+    { "source": "/api/(.*)", "destination": "/server.js" }
   ]
 }

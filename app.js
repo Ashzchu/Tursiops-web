@@ -1,10 +1,10 @@
-﻿/**
- * TURSIOPS — Frontend Controller
- * Bland dashboard with header Sign In modal pop-up and Turso authentication flow.
+/**
+ * TURSIOPS — VS Code Extension Portal & User Manual Controller
+ * Floating Hover Navigation, Interactive Manual Commands, and Extension Authentication Routing.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initDashboardAuth();
+  initPortalApp();
 });
 
 let toastTimeout = null;
@@ -19,13 +19,70 @@ function showToast(message, duration = 3000) {
   }, duration);
 }
 
-function initDashboardAuth() {
-  const headerAuthBtn = document.getElementById('headerAuthBtn');
-  const headerUserEmail = document.getElementById('headerUserEmail');
-  const headerSignOutBtn = document.getElementById('headerSignOutBtn');
+function initPortalApp() {
+  // 1. Floating Nav Active Tracking & Smooth Scroll
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      const targetId = item.getAttribute('href');
+      if (targetId && targetId.startsWith('#')) {
+        navItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+      }
+    });
+  });
 
+  // 2. Interactive User Manual Command Tabs
+  const manualTabs = [
+    {
+      btnId: 'mTab1',
+      name: 'Tursiops: Show File Memory',
+      shortcut: 'Ctrl+Alt+M / Cmd+Alt+M',
+      desc: 'Retrieves and displays the full architectural decision log, prompt history, diff changes, and type validation records attached to the currently open file in VS Code.',
+      syntax: 'Press Ctrl+Shift+P -> Type "Tursiops: Show File Memory" -> Select active file'
+    },
+    {
+      btnId: 'mTab2',
+      name: 'Tursiops: Remember Prompt',
+      shortcut: 'Ctrl+Alt+R / Cmd+Alt+R',
+      desc: 'Pins a prompt directive and AI modification summary to the active AST file scope. Stored forever in local .tursiops/ directory memory.',
+      syntax: 'Press Ctrl+Shift+P -> Type "Tursiops: Remember Prompt" -> Enter directive text'
+    },
+    {
+      btnId: 'mTab3',
+      name: 'Tursiops: Inspect Diff',
+      shortcut: 'Ctrl+Alt+D / Cmd+Alt+D',
+      desc: 'Opens an interactive side-by-side diff viewer comparing proposed AI code modifications against the local file baseline before approving changes.',
+      syntax: 'Press Ctrl+Shift+P -> Type "Tursiops: Inspect Diff" -> Review & Approve'
+    }
+  ];
+
+  const cmdName = document.getElementById('cmdName');
+  const cmdDesc = document.getElementById('cmdDesc');
+  const cmdSyntax = document.getElementById('cmdSyntax');
+
+  manualTabs.forEach(tab => {
+    const btn = document.getElementById(tab.btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      manualTabs.forEach(t => {
+        const b = document.getElementById(t.btnId);
+        if (b) b.classList.remove('active');
+      });
+      btn.classList.add('active');
+
+      if (cmdName) cmdName.textContent = tab.name;
+      if (cmdDesc) cmdDesc.textContent = tab.desc;
+      if (cmdSyntax) cmdSyntax.innerHTML = `<code>${tab.syntax}</code>`;
+    });
+  });
+
+  // 3. Extension Auth Buttons & Modal Handling
+  const btnNavAuth = document.getElementById('btnNavAuth');
+  const btnHeroAuth = document.getElementById('btnHeroAuth');
   const authModal = document.getElementById('authModal');
   const btnCloseModal = document.getElementById('btnCloseModal');
+
   const modalHeading = document.getElementById('modalHeading');
   const modalTabSignIn = document.getElementById('modalTabSignIn');
   const modalTabSignUp = document.getElementById('modalTabSignUp');
@@ -35,7 +92,6 @@ function initDashboardAuth() {
   const modalName = document.getElementById('modalName');
   const modalEmail = document.getElementById('modalEmail');
   const modalPassword = document.getElementById('modalPassword');
-  const labelModalPassword = document.getElementById('labelModalPassword');
   const groupConfirmPassword = document.getElementById('groupConfirmPassword');
   const modalConfirmPassword = document.getElementById('modalConfirmPassword');
 
@@ -49,30 +105,29 @@ function initDashboardAuth() {
 
   let mode = 'login'; // 'login' or 'signup'
 
-  // 1. Detect dynamic deep link from query parameters (?redirect_uri=vscode://...)
+  // Detect dynamic URL paths & query parameters (/signup, /signin, /landing, ?mode=signup)
+  const pathname = window.location.pathname.toLowerCase();
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUri = urlParams.get('redirect_uri');
+  const modeParam = urlParams.get('mode');
 
   if (redirectUri && deepLinkBanner && deepLinkTarget) {
     deepLinkBanner.style.display = 'block';
     deepLinkTarget.textContent = redirectUri;
-    // Auto-open modal if dynamic redirect is provided
+  }
+
+  // Automatic Modal Opening based on 3 Base URL Links (/signup, /signin, /landing)
+  if (pathname === '/signup' || modeParam === 'signup') {
+    openModal('signup');
+  } else if (pathname === '/signin' || pathname === '/login' || modeParam === 'signin' || modeParam === 'login' || redirectUri) {
     openModal('login');
   }
 
-  // 2. Modal open & close
   function openModal(initialMode = 'login') {
     setMode(initialMode);
     authModal.classList.add('active');
     authModal.setAttribute('aria-hidden', 'false');
     clearAlert();
-    setTimeout(() => {
-      if (mode === 'signup' && modalName) {
-        modalName.focus();
-      } else {
-        modalEmail.focus();
-      }
-    }, 100);
   }
 
   function closeModal() {
@@ -81,13 +136,11 @@ function initDashboardAuth() {
     clearAlert();
   }
 
-  if (headerAuthBtn) {
-    headerAuthBtn.addEventListener('click', () => openModal('login'));
-  }
+  [btnNavAuth, btnHeroAuth].forEach(btn => {
+    if (btn) btn.addEventListener('click', () => openModal('login'));
+  });
 
-  if (btnCloseModal) {
-    btnCloseModal.addEventListener('click', closeModal);
-  }
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 
   authModal.addEventListener('click', (e) => {
     if (e.target === authModal) closeModal();
@@ -99,234 +152,99 @@ function initDashboardAuth() {
     }
   });
 
-  // 3. Tab switching inside popup (Sign In vs Sign Up)
   function setMode(newMode) {
     mode = newMode;
     clearAlert();
-
-    if (mode === 'login') {
+    if (mode === 'signup') {
+      modalTabSignUp.classList.add('active');
+      modalTabSignIn.classList.remove('active');
+      modalHeading.textContent = 'CREATE EXTENSION ACCOUNT';
+      modalSubmitText.textContent = 'CREATE ACCOUNT & RETURN TO VS CODE';
+      groupName.style.display = 'block';
+      groupConfirmPassword.style.display = 'block';
+    } else {
       modalTabSignIn.classList.add('active');
       modalTabSignUp.classList.remove('active');
-      modalHeading.textContent = 'Sign In';
-      modalSubmitText.textContent = redirectUri ? 'Sign In & Connect to IDE' : 'Sign In';
+      modalHeading.textContent = 'AUTHORIZE VS CODE EXTENSION';
+      modalSubmitText.textContent = 'AUTHORIZE & RETURN TO VS CODE';
       groupName.style.display = 'none';
-      modalName.removeAttribute('required');
       groupConfirmPassword.style.display = 'none';
-      modalConfirmPassword.removeAttribute('required');
-      labelModalPassword.textContent = 'Password';
-      modalPassword.setAttribute('autocomplete', 'current-password');
-    } else {
-      modalTabSignIn.classList.remove('active');
-      modalTabSignUp.classList.add('active');
-      modalHeading.textContent = 'Create Developer Account';
-      modalSubmitText.textContent = redirectUri ? 'Create Account & Connect IDE' : 'Create Account';
-      groupName.style.display = 'block';
-      modalName.setAttribute('required', 'true');
-      groupConfirmPassword.style.display = 'block';
-      modalConfirmPassword.setAttribute('required', 'true');
-      labelModalPassword.textContent = 'Password (min 6 characters)';
-      modalPassword.setAttribute('autocomplete', 'new-password');
     }
   }
 
   modalTabSignIn.addEventListener('click', () => setMode('login'));
   modalTabSignUp.addEventListener('click', () => setMode('signup'));
 
-  function formatErrorMessage(errData) {
-    if (!errData) return 'An error occurred during authentication.';
-    if (typeof errData === 'string') return errData;
-    if (typeof errData === 'object') {
-      if (errData.message && typeof errData.message === 'string') return errData.message;
-      if (errData.error) {
-        if (typeof errData.error === 'string') return errData.error;
-        if (errData.error.message && typeof errData.error.message === 'string') return errData.error.message;
-      }
-      try {
-        return JSON.stringify(errData);
-      } catch {
-        return 'An error occurred during authentication.';
-      }
-    }
-    return String(errData);
-  }
-
-  function showAlert(msg, type = 'error') {
-    authAlertBox.textContent = formatErrorMessage(msg);
-    authAlertBox.className = `auth-alert-box ${type}`;
+  function showAlert(msg, isError = true) {
+    authAlertBox.textContent = msg;
+    authAlertBox.className = `auth-alert-box ${isError ? 'error' : 'success'}`;
   }
 
   function clearAlert() {
+    authAlertBox.style.display = 'none';
     authAlertBox.textContent = '';
-    authAlertBox.className = 'auth-alert-box';
   }
 
-  // 4. Session restoration check via /api/me
-  const savedToken = localStorage.getItem('tursiops_token');
-  if (savedToken && !redirectUri) {
-    validateSession(savedToken);
-  }
-
-  async function validateSession(token) {
-    try {
-      const res = await fetch('/api/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.user) {
-          updateHeaderLoggedIn(data.user);
-        }
-      } else {
-        localStorage.removeItem('tursiops_token');
-      }
-    } catch (e) {
-      // offline or network glitch
-    }
-  }
-
-  function updateHeaderLoggedIn(user) {
-    if (headerAuthBtn) headerAuthBtn.style.display = 'none';
-    if (headerUserEmail) {
-      headerUserEmail.style.display = 'inline-block';
-      headerUserEmail.textContent = user.name ? `${user.name} (${user.email})` : user.email;
-    }
-    if (headerSignOutBtn) headerSignOutBtn.style.display = 'inline-block';
-  }
-
-  if (headerSignOutBtn) {
-    headerSignOutBtn.addEventListener('click', () => {
-      localStorage.removeItem('tursiops_token');
-      if (headerUserEmail) headerUserEmail.style.display = 'none';
-      if (headerSignOutBtn) headerSignOutBtn.style.display = 'none';
-      if (headerAuthBtn) headerAuthBtn.style.display = 'inline-block';
-      showToast('Signed out successfully.');
-    });
-  }
-
-  // 5. Form submission
+  // Submit Handler
   popupAuthForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAlert();
 
     const email = modalEmail.value.trim();
     const password = modalPassword.value;
-    const name = modalName ? modalName.value.trim() : '';
-    const confirmPassword = modalConfirmPassword ? modalConfirmPassword.value : '';
+    const name = modalName.value.trim();
+    const confirmPassword = modalConfirmPassword.value;
 
     if (!email || !password) {
-      showAlert('Email and password are required.');
-      return;
+      return showAlert('Please fill in all required fields.');
     }
 
     if (mode === 'signup') {
-      if (!name) {
-        showAlert('Please enter your name.');
-        return;
+      if (password !== confirmPassword) {
+        return showAlert('Passwords do not match.');
       }
       if (password.length < 6) {
-        showAlert('Password must be at least 6 characters.');
-        return;
-      }
-      if (password !== confirmPassword) {
-        showAlert('Passwords do not match. Please re-enter.');
-        return;
+        return showAlert('Password must be at least 6 characters.');
       }
     }
 
     btnModalSubmit.disabled = true;
-    modalSpinner.style.display = 'inline';
-
-    const endpoint = mode === 'signup' ? '/signup' : '/login';
-    const query = redirectUri ? `?redirect_uri=${encodeURIComponent(redirectUri)}` : '';
-    const fullUrl = `${endpoint}${query}`;
+    modalSpinner.style.display = 'inline-block';
 
     try {
-      if (redirectUri) {
-        // If VS Code deep link redirect is active, submit via form post so browser directly performs the 302 to vscode://
-        const tempForm = document.createElement('form');
-        tempForm.method = 'POST';
-        tempForm.action = fullUrl;
+      const endpoint = mode === 'signup' ? '/signup' : '/login';
+      const body = { email, password };
+      if (mode === 'signup') body.name = name || undefined;
+      if (redirectUri) body.redirect_uri = redirectUri;
 
-        if (mode === 'signup') {
-          const nameInput = document.createElement('input');
-          nameInput.type = 'hidden';
-          nameInput.name = 'name';
-          nameInput.value = name;
-          tempForm.appendChild(nameInput);
-
-          const confirmInput = document.createElement('input');
-          confirmInput.type = 'hidden';
-          confirmInput.name = 'confirmPassword';
-          confirmInput.value = confirmPassword;
-          tempForm.appendChild(confirmInput);
-        }
-
-        const emailInput = document.createElement('input');
-        emailInput.type = 'hidden';
-        emailInput.name = 'email';
-        emailInput.value = email;
-        tempForm.appendChild(emailInput);
-
-        const passInput = document.createElement('input');
-        passInput.type = 'hidden';
-        passInput.name = 'password';
-        passInput.value = password;
-        tempForm.appendChild(passInput);
-
-        document.body.appendChild(tempForm);
-        tempForm.submit();
-        return;
-      }
-
-      // Standard API JSON fetch
-      const payload = { email, password };
-      if (mode === 'signup') {
-        payload.name = name;
-        payload.confirmPassword = confirmPassword;
-      }
-
-      const res = await fetch(fullUrl, {
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
 
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = { message: await res.text().catch(() => 'Authentication failed') };
-      }
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const errMsg = formatErrorMessage(data);
-        throw new Error(errMsg);
+        throw new Error(data.message || 'Authorization failed');
       }
 
       if (data.token) {
         localStorage.setItem('tursiops_token', data.token);
       }
 
-      showAlert(mode === 'signup' ? 'Account created successfully!' : 'Signed in successfully!', 'success');
-      showToast(mode === 'signup' ? `✓ Welcome ${data.user?.name || email}!` : '✓ Authenticated successfully');
+      showToast(mode === 'signup' ? '✓ Account created! Redirecting...' : '✓ Authorized for VS Code!');
+      closeModal();
+      popupAuthForm.reset();
 
-      if (data.user) {
-        updateHeaderLoggedIn(data.user);
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
       }
-
-      setTimeout(() => {
-        closeModal();
-      }, 700);
-
     } catch (err) {
-      showAlert(err.message || 'An error occurred during authentication.');
+      showAlert(err.message || 'Error processing request.');
     } finally {
       btnModalSubmit.disabled = false;
       modalSpinner.style.display = 'none';
     }
   });
 }
-

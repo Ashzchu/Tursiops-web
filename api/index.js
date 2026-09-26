@@ -1,19 +1,9 @@
 /**
- * Vercel Serverless Function entrypoint with Diagnostic Catch
+ * Vercel Serverless Function
+ * Re-exports the Express app so Vercel can route
+ * API requests (POST /signup, POST /login, GET /api/me, etc.)
+ * through the Express middleware stack.
  */
-export default async function handler(req, res) {
-  try {
-    const { default: app } = await import('../server.js');
-    return app(req, res);
-  } catch (err) {
-    console.error('[FATAL SERVERLESS ERROR]', err);
-    return res.status(500).json({
-      error: 'Serverless Error',
-      name: err.name,
-      message: err.message,
-      stack: err.stack,
-    });
-  }
-}
+import app from '../server.js';
 
-
+export default app;
