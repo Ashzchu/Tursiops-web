@@ -30,11 +30,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 // Direct page route aliases for Vercel & local development
-app.get(['/', '/landing', '/signup', '/signin', '/login'], (req, res, next) => {
-  // If request accepts HTML, serve index.html for client-side route handling
-  if (req.accepts('html')) {
-    return res.sendFile(path.join(__dirname, 'index.html'));
-  }
+// Each route serves its own dedicated HTML file
+app.get('/', (req, res, next) => {
+  if (req.accepts('html')) return res.sendFile(path.join(__dirname, 'index.html'));
+  next();
+});
+app.get('/landing', (req, res, next) => {
+  if (req.accepts('html')) return res.sendFile(path.join(__dirname, 'landing.html'));
+  next();
+});
+app.get('/signup', (req, res, next) => {
+  if (req.accepts('html')) return res.sendFile(path.join(__dirname, 'signup.html'));
+  next();
+});
+app.get(['/signin', '/login'], (req, res, next) => {
+  if (req.accepts('html')) return res.sendFile(path.join(__dirname, 'signin.html'));
   next();
 });
 
@@ -98,25 +108,31 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server and Initialize Database
+// Start Server and Initialize Database (local dev only)
+// On Vercel, api/index.js imports this module — we skip listen()
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+
 async function start() {
   try {
     await initDb();
-    app.listen(PORT, () => {
-      console.log(`====================================================`);
-      console.log(`🐬 TURSIOPS AUTH SERVER RUNNING ON PORT ${PORT}`);
-      console.log(`- Base URL:    http://localhost:${PORT}`);
-      console.log(`- Landing:     http://localhost:${PORT}/landing`);
-      console.log(`- Sign In:     http://localhost:${PORT}/signin`);
-      console.log(`- Sign Up:     http://localhost:${PORT}/signup`);
-      console.log(`====================================================`);
-    });
+    if (!isVercel) {
+      app.listen(PORT, () => {
+        console.log(`====================================================`);
+        console.log(`🐬 TURSIOPS AUTH SERVER RUNNING ON PORT ${PORT}`);
+        console.log(`- Base URL:    http://localhost:${PORT}`);
+        console.log(`- Landing:     http://localhost:${PORT}/landing`);
+        console.log(`- Sign In:     http://localhost:${PORT}/signin`);
+        console.log(`- Sign Up:     http://localhost:${PORT}/signup`);
+        console.log(`====================================================`);
+      });
+    }
   } catch (err) {
     console.error('Fatal error starting server:', err);
-    process.exit(1);
+    if (!isVercel) process.exit(1);
   }
 }
 
 start();
 
 export default app;
+
