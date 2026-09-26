@@ -1,0 +1,31 @@
+{
+  "name": "tursiops-auth-server",
+  "version": "1.0.0",
+  "description": "Authentication server for Tursiops VS Code extension backed by Turso libSQL",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node server/test_auth.js && node server/test_http.js",
+    "test:db": "node -e \"import('./server/db.js').then(m => m.initDb()).then(() => console.log('Database initialized successfully!')).catch(console.error)\""
+  },
+  "keywords": [
+    "tursiops",
+    "vscode",
+    "authentication",
+    "turso",
+    "libsql",
+    "jwt"
+  ],
+  "author": "Ashzchu",
+  "license": "MIT",
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
