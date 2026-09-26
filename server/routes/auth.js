@@ -24,13 +24,13 @@ function isValidEmail(email) {
 /**
  * -------------------------------------------------------------------------
  * POST /signup
- * Creates a new user in Turso, hashes password, and issues JWT.
+ * Creates a new user in Turso with name, email, password validation.
  * If redirect_uri is provided, executes an HTTP 302 redirect to the IDE deep link.
  * -------------------------------------------------------------------------
  */
 router.post('/signup', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
     const redirectUri = getRedirectUri(req);
 
     // 1. Validate Input
@@ -40,6 +40,7 @@ router.post('/signup', async (req, res, next) => {
           mode: 'signup',
           redirectUri,
           error: 'Email and password are required.',
+          name: name || '',
           email: email || '',
         }));
       }
@@ -49,12 +50,30 @@ router.post('/signup', async (req, res, next) => {
       });
     }
 
+    // Validate Confirm Password if supplied
+    if (confirmPassword !== undefined && confirmPassword !== password) {
+      if (req.accepts('html') && !req.xhr && !req.is('json')) {
+        return res.status(400).send(renderAuthPage({
+          mode: 'signup',
+          redirectUri,
+          error: 'Passwords do not match. Please re-enter.',
+          name: name || '',
+          email,
+        }));
+      }
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Passwords do not match.',
+      });
+    }
+
     if (!isValidEmail(email)) {
       if (req.accepts('html') && !req.xhr && !req.is('json')) {
         return res.status(400).send(renderAuthPage({
           mode: 'signup',
           redirectUri,
           error: 'Please provide a valid email address.',
+          name: name || '',
           email,
         }));
       }
@@ -70,6 +89,7 @@ router.post('/signup', async (req, res, next) => {
           mode: 'signup',
           redirectUri,
           error: 'Password must be at least 6 characters long.',
+          name: name || '',
           email,
         }));
       }
@@ -87,6 +107,7 @@ router.post('/signup', async (req, res, next) => {
           mode: 'signup',
           redirectUri,
           error: 'An account with this email already exists.',
+          name: name || '',
           email,
         }));
       }
@@ -99,8 +120,9 @@ router.post('/signup', async (req, res, next) => {
     // 3. Hash Password using bcrypt
     const passwordHash = await hashPassword(password);
 
-    // 4. Create User in Turso libSQL
+    // 4. Create User in Turso libSQL with Name
     const newUser = await createUser({
+      name: name || null,
       email,
       passwordHash,
     });
@@ -122,6 +144,7 @@ router.post('/signup', async (req, res, next) => {
       token,
       user: {
         id: newUser.id,
+        name: newUser.name,
         email: newUser.email,
       },
     });
@@ -209,6 +232,7 @@ router.post('/login', async (req, res, next) => {
       token,
       user: {
         id: user.id,
+        name: user.name,
         email: user.email,
       },
     });
@@ -219,8 +243,7 @@ router.post('/login', async (req, res, next) => {
 
 /**
  * -------------------------------------------------------------------------
- * GET /login
- * Renders the clean dark-themed login interface for VS Code browser auth.
+ * GET /login & GET /signup
  * -------------------------------------------------------------------------
  */
 router.get('/login', (req, res) => {
@@ -232,12 +255,6 @@ router.get('/login', (req, res) => {
   }));
 });
 
-/**
- * -------------------------------------------------------------------------
- * GET /signup
- * Renders the clean dark-themed signup interface for VS Code browser auth.
- * -------------------------------------------------------------------------
- */
 router.get('/signup', (req, res) => {
   const redirectUri = getRedirectUri(req);
   res.send(renderAuthPage({
@@ -248,9 +265,9 @@ router.get('/signup', (req, res) => {
 });
 
 /**
- * Helper to render an elegant web interface matching the Tursiops developer aesthetic
+ * Helper to render server-side fallback auth page
  */
-function renderAuthPage({ mode, redirectUri, error, email }) {
+function renderAuthPage({ mode, redirectUri, error, name, email }) {
   const isLogin = mode === 'login';
   const title = isLogin ? 'Sign In to Tursiops' : 'Create Tursiops Account';
   const actionUrl = isLogin ? '/login' : '/signup';
@@ -267,170 +284,49 @@ function renderAuthPage({ mode, redirectUri, error, email }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} | Persistent Coding Memory</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>${title} | Tursiops</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #070a10;
-      color: #f8fafc;
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      position: relative;
-    }
-    .card {
-      background-color: #0c111a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 36px 32px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 35px rgba(56, 189, 248, 0.08);
-      position: relative;
-      z-index: 10;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-      justify-content: center;
-    }
-    .brand-glyph { font-size: 26px; }
-    .brand-name {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-    h2 {
-      font-size: 20px;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    p.sub {
-      color: #94a3b8;
-      font-size: 13px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .error-box {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 20px;
-    }
-    .badge-ide {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-family: 'Fira Code', monospace;
-      color: #38bdf8;
-      margin-bottom: 20px;
-      word-break: break-all;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-    }
-    input {
-      width: 100%;
-      background: #06090e;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 6px;
-      padding: 10px 14px;
-      color: #ffffff;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
-    }
-    button.btn-submit {
-      width: 100%;
-      background: #ffffff;
-      color: #06090e;
-      border: none;
-      border-radius: 6px;
-      padding: 11px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-top: 8px;
-    }
-    button.btn-submit:hover {
-      background: #e2e8f0;
-    }
-    .footer-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-    }
-    .footer-link a {
-      color: #38bdf8;
-      text-decoration: none;
-    }
-    .footer-link a:hover {
-      text-decoration: underline;
-    }
+    body { background-color: #070a10; color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: #0c111a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 32px; width: 100%; max-width: 400px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; margin-bottom: 6px; color: #cbd5e1; }
+    input { width: 100%; box-sizing: border-box; background: #06090e; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 10px; color: #fff; }
+    .btn-submit { width: 100%; background: #fff; color: #000; border: none; padding: 11px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    .error { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="brand">
-      <span class="brand-glyph">🐬</span>
-      <span class="brand-name">TURSIOPS</span>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <span style="font-size: 26px;">🐬</span>
+      <h2>${title}</h2>
     </div>
-
-    <h2>${title}</h2>
-    <p class="sub">Authenticate to sync persistent coding directives</p>
-
-    ${redirectUri ? `<div class="badge-ide">IDE Redirect: ${escapeHtml(redirectUri)}</div>` : ''}
-
-    ${error ? `<div class="error-box">${escapeHtml(error)}</div>` : ''}
-
+    ${error ? `<div class="error">${escapeHtml(error)}</div>` : ''}
     <form method="POST" action="${actionUrl}${queryParam}">
       ${redirectUri ? `<input type="hidden" name="redirect_uri" value="${escapeHtml(redirectUri)}">` : ''}
-
+      ${!isLogin ? `
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required placeholder="John Doe" value="${escapeHtml(name || '')}">
+      </div>` : ''}
       <div class="form-group">
         <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" required placeholder="you@domain.com" value="${escapeHtml(email || '')}">
+        <input type="email" id="email" name="email" required placeholder="developer@domain.com" value="${escapeHtml(email || '')}">
       </div>
-
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" required placeholder="${isLogin ? '••••••••' : 'At least 6 characters'}">
+        <input type="password" id="password" name="password" required placeholder="••••••••••••">
       </div>
-
-      <button type="submit" class="btn-submit">${isLogin ? 'Sign In & Connect to IDE' : 'Create Account & Connect'}</button>
+      ${!isLogin ? `
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••••••">
+      </div>` : ''}
+      <button type="submit" class="btn-submit">${isLogin ? 'Sign In' : 'Sign Up'}</button>
     </form>
-
-    <div class="footer-link">
-      <a href="${toggleUrl}">${toggleText}</a>
+    <div style="text-align: center; margin-top: 16px; font-size: 13px;">
+      <a href="${toggleUrl}" style="color: #38bdf8; text-decoration: none;">${toggleText}</a>
     </div>
   </div>
 </body>

@@ -1,10 +1,10 @@
 /**
- * TURSIOPS — Frontend Authentication Controller
- * Connects directly to /login and /signup backend endpoints with Turso database and dynamic VS Code deep link support.
+ * TURSIOPS — Frontend Controller
+ * Bland dashboard with header Sign In modal pop-up and Turso authentication flow.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initAuthApp();
+  initDashboardAuth();
 });
 
 let toastTimeout = null;
@@ -19,77 +19,136 @@ function showToast(message, duration = 3000) {
   }, duration);
 }
 
-function initAuthApp() {
-  const btnTabSignIn = document.getElementById('btnTabSignIn');
-  const btnTabSignUp = document.getElementById('btnTabSignUp');
-  const mainAuthForm = document.getElementById('mainAuthForm');
-  const inputEmail = document.getElementById('inputEmail');
-  const inputPassword = document.getElementById('inputPassword');
-  const labelPassword = document.getElementById('labelPassword');
-  const btnSubmit = document.getElementById('btnSubmit');
-  const submitText = document.getElementById('submitText');
-  const submitSpinner = document.getElementById('submitSpinner');
-  const authAlert = document.getElementById('authAlert');
-  const deepLinkNotice = document.getElementById('deepLinkNotice');
-  const deepLinkVal = document.getElementById('deepLinkVal');
-  const userProfileCard = document.getElementById('userProfileCard');
-  const profileEmail = document.getElementById('profileEmail');
-  const profileUserId = document.getElementById('profileUserId');
-  const btnSignOut = document.getElementById('btnSignOut');
+function initDashboardAuth() {
+  const headerAuthBtn = document.getElementById('headerAuthBtn');
+  const headerUserEmail = document.getElementById('headerUserEmail');
+  const headerSignOutBtn = document.getElementById('headerSignOutBtn');
+
+  const authModal = document.getElementById('authModal');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+  const modalHeading = document.getElementById('modalHeading');
+  const modalTabSignIn = document.getElementById('modalTabSignIn');
+  const modalTabSignUp = document.getElementById('modalTabSignUp');
+
+  const popupAuthForm = document.getElementById('popupAuthForm');
+  const groupName = document.getElementById('groupName');
+  const modalName = document.getElementById('modalName');
+  const modalEmail = document.getElementById('modalEmail');
+  const modalPassword = document.getElementById('modalPassword');
+  const labelModalPassword = document.getElementById('labelModalPassword');
+  const groupConfirmPassword = document.getElementById('groupConfirmPassword');
+  const modalConfirmPassword = document.getElementById('modalConfirmPassword');
+
+  const btnModalSubmit = document.getElementById('btnModalSubmit');
+  const modalSubmitText = document.getElementById('modalSubmitText');
+  const modalSpinner = document.getElementById('modalSpinner');
+  const authAlertBox = document.getElementById('authAlertBox');
+
+  const deepLinkBanner = document.getElementById('deepLinkBanner');
+  const deepLinkTarget = document.getElementById('deepLinkTarget');
 
   let mode = 'login'; // 'login' or 'signup'
 
-  // 1. Detect dynamic deep link from URL params (e.g. ?redirect_uri=vscode://...)
+  // 1. Detect dynamic deep link from query parameters (?redirect_uri=vscode://...)
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUri = urlParams.get('redirect_uri');
 
-  if (redirectUri && deepLinkNotice && deepLinkVal) {
-    deepLinkNotice.style.display = 'flex';
-    deepLinkVal.textContent = redirectUri;
+  if (redirectUri && deepLinkBanner && deepLinkTarget) {
+    deepLinkBanner.style.display = 'block';
+    deepLinkTarget.textContent = redirectUri;
+    // Auto-open modal if dynamic redirect is provided
+    openModal('login');
   }
 
-  // 2. Tab switching logic
+  // 2. Modal open & close
+  function openModal(initialMode = 'login') {
+    setMode(initialMode);
+    authModal.classList.add('active');
+    authModal.setAttribute('aria-hidden', 'false');
+    clearAlert();
+    setTimeout(() => {
+      if (mode === 'signup' && modalName) {
+        modalName.focus();
+      } else {
+        modalEmail.focus();
+      }
+    }, 100);
+  }
+
+  function closeModal() {
+    authModal.classList.remove('active');
+    authModal.setAttribute('aria-hidden', 'true');
+    clearAlert();
+  }
+
+  if (headerAuthBtn) {
+    headerAuthBtn.addEventListener('click', () => openModal('login'));
+  }
+
+  if (btnCloseModal) {
+    btnCloseModal.addEventListener('click', closeModal);
+  }
+
+  authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) closeModal();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && authModal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  // 3. Tab switching inside popup (Sign In vs Sign Up)
   function setMode(newMode) {
     mode = newMode;
     clearAlert();
 
     if (mode === 'login') {
-      btnTabSignIn.classList.add('active');
-      btnTabSignUp.classList.remove('active');
-      submitText.textContent = redirectUri ? 'Sign In & Redirect to IDE' : 'Sign In to Tursiops';
-      labelPassword.textContent = 'Password';
-      inputPassword.placeholder = '••••••••••••';
-      inputPassword.setAttribute('autocomplete', 'current-password');
+      modalTabSignIn.classList.add('active');
+      modalTabSignUp.classList.remove('active');
+      modalHeading.textContent = 'Sign In';
+      modalSubmitText.textContent = redirectUri ? 'Sign In & Connect to IDE' : 'Sign In';
+      groupName.style.display = 'none';
+      modalName.removeAttribute('required');
+      groupConfirmPassword.style.display = 'none';
+      modalConfirmPassword.removeAttribute('required');
+      labelModalPassword.textContent = 'Password';
+      modalPassword.setAttribute('autocomplete', 'current-password');
     } else {
-      btnTabSignIn.classList.remove('active');
-      btnTabSignUp.classList.add('active');
-      submitText.textContent = redirectUri ? 'Create Account & Connect IDE' : 'Create Tursiops Account';
-      labelPassword.textContent = 'Choose Password (min 6 chars)';
-      inputPassword.placeholder = 'At least 6 characters';
-      inputPassword.setAttribute('autocomplete', 'new-password');
+      modalTabSignIn.classList.remove('active');
+      modalTabSignUp.classList.add('active');
+      modalHeading.textContent = 'Create Developer Account';
+      modalSubmitText.textContent = redirectUri ? 'Create Account & Connect IDE' : 'Create Account';
+      groupName.style.display = 'block';
+      modalName.setAttribute('required', 'true');
+      groupConfirmPassword.style.display = 'block';
+      modalConfirmPassword.setAttribute('required', 'true');
+      labelModalPassword.textContent = 'Password (min 6 characters)';
+      modalPassword.setAttribute('autocomplete', 'new-password');
     }
   }
 
-  btnTabSignIn.addEventListener('click', () => setMode('login'));
-  btnTabSignUp.addEventListener('click', () => setMode('signup'));
+  modalTabSignIn.addEventListener('click', () => setMode('login'));
+  modalTabSignUp.addEventListener('click', () => setMode('signup'));
 
   function showAlert(msg, type = 'error') {
-    authAlert.textContent = msg;
-    authAlert.className = `auth-alert ${type}`;
+    authAlertBox.textContent = msg;
+    authAlertBox.className = `auth-alert-box ${type}`;
   }
 
   function clearAlert() {
-    authAlert.textContent = '';
-    authAlert.className = 'auth-alert';
+    authAlertBox.textContent = '';
+    authAlertBox.className = 'auth-alert-box';
   }
 
-  // 3. Check existing token in localStorage for standard web sessions
-  const storedToken = localStorage.getItem('tursiops_token');
-  if (storedToken && !redirectUri) {
-    fetchProfile(storedToken);
+  // 4. Session restoration check via /api/me
+  const savedToken = localStorage.getItem('tursiops_token');
+  if (savedToken && !redirectUri) {
+    validateSession(savedToken);
   }
 
-  async function fetchProfile(token) {
+  async function validateSession(token) {
     try {
       const res = await fetch('/api/me', {
         headers: { Authorization: `Bearer ${token}` }
@@ -97,57 +156,67 @@ function initAuthApp() {
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
-          showUserProfile(data.user);
+          updateHeaderLoggedIn(data.user);
         }
       } else {
         localStorage.removeItem('tursiops_token');
       }
     } catch (e) {
-      // Ignore network errors on auto-check
+      // offline or network glitch
     }
   }
 
-  function showUserProfile(user) {
-    if (userProfileCard && profileEmail && profileUserId) {
-      profileEmail.textContent = `User: ${user.email}`;
-      profileUserId.textContent = `ID: ${user.id}`;
-      userProfileCard.classList.add('active');
-      if (mainAuthForm) mainAuthForm.style.display = 'none';
-      if (btnTabSignIn) btnTabSignIn.parentElement.style.display = 'none';
+  function updateHeaderLoggedIn(user) {
+    if (headerAuthBtn) headerAuthBtn.style.display = 'none';
+    if (headerUserEmail) {
+      headerUserEmail.style.display = 'inline-block';
+      headerUserEmail.textContent = user.name ? `${user.name} (${user.email})` : user.email;
     }
+    if (headerSignOutBtn) headerSignOutBtn.style.display = 'inline-block';
   }
 
-  if (btnSignOut) {
-    btnSignOut.addEventListener('click', () => {
+  if (headerSignOutBtn) {
+    headerSignOutBtn.addEventListener('click', () => {
       localStorage.removeItem('tursiops_token');
-      if (userProfileCard) userProfileCard.classList.remove('active');
-      if (mainAuthForm) mainAuthForm.style.display = 'block';
-      if (btnTabSignIn) btnTabSignIn.parentElement.style.display = 'flex';
-      showToast('Signed out of session');
+      if (headerUserEmail) headerUserEmail.style.display = 'none';
+      if (headerSignOutBtn) headerSignOutBtn.style.display = 'none';
+      if (headerAuthBtn) headerAuthBtn.style.display = 'inline-block';
+      showToast('Signed out successfully.');
     });
   }
 
-  // 4. Form Submit Handler
-  mainAuthForm.addEventListener('submit', async (e) => {
+  // 5. Form submission
+  popupAuthForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAlert();
 
-    const email = inputEmail.value.trim();
-    const password = inputPassword.value;
+    const email = modalEmail.value.trim();
+    const password = modalPassword.value;
+    const name = modalName ? modalName.value.trim() : '';
+    const confirmPassword = modalConfirmPassword ? modalConfirmPassword.value : '';
 
     if (!email || !password) {
-      showAlert('Please enter both email and password.');
+      showAlert('Email and password are required.');
       return;
     }
 
-    if (mode === 'signup' && password.length < 6) {
-      showAlert('Password must be at least 6 characters.');
-      return;
+    if (mode === 'signup') {
+      if (!name) {
+        showAlert('Please enter your name.');
+        return;
+      }
+      if (password.length < 6) {
+        showAlert('Password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        showAlert('Passwords do not match. Please re-enter.');
+        return;
+      }
     }
 
-    // Set loading state
-    btnSubmit.disabled = true;
-    submitSpinner.style.display = 'inline';
+    btnModalSubmit.disabled = true;
+    modalSpinner.style.display = 'inline';
 
     const endpoint = mode === 'signup' ? '/signup' : '/login';
     const query = redirectUri ? `?redirect_uri=${encodeURIComponent(redirectUri)}` : '';
@@ -155,36 +224,56 @@ function initAuthApp() {
 
     try {
       if (redirectUri) {
-        // If there's an IDE redirect_uri, submit as a standard HTML form to let the browser trigger the 302 to vscode://
+        // If VS Code deep link redirect is active, submit via form post so browser directly performs the 302 to vscode://
         const tempForm = document.createElement('form');
         tempForm.method = 'POST';
         tempForm.action = fullUrl;
 
-        const emailField = document.createElement('input');
-        emailField.type = 'hidden';
-        emailField.name = 'email';
-        emailField.value = email;
-        tempForm.appendChild(emailField);
+        if (mode === 'signup') {
+          const nameInput = document.createElement('input');
+          nameInput.type = 'hidden';
+          nameInput.name = 'name';
+          nameInput.value = name;
+          tempForm.appendChild(nameInput);
 
-        const passField = document.createElement('input');
-        passField.type = 'hidden';
-        passField.name = 'password';
-        passField.value = password;
-        tempForm.appendChild(passField);
+          const confirmInput = document.createElement('input');
+          confirmInput.type = 'hidden';
+          confirmInput.name = 'confirmPassword';
+          confirmInput.value = confirmPassword;
+          tempForm.appendChild(confirmInput);
+        }
+
+        const emailInput = document.createElement('input');
+        emailInput.type = 'hidden';
+        emailInput.name = 'email';
+        emailInput.value = email;
+        tempForm.appendChild(emailInput);
+
+        const passInput = document.createElement('input');
+        passInput.type = 'hidden';
+        passInput.name = 'password';
+        passInput.value = password;
+        tempForm.appendChild(passInput);
 
         document.body.appendChild(tempForm);
         tempForm.submit();
         return;
       }
 
-      // Standard Web Session: JSON API fetch
+      // Standard API JSON fetch
+      const payload = { email, password };
+      if (mode === 'signup') {
+        payload.name = name;
+        payload.confirmPassword = confirmPassword;
+      }
+
       const res = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -193,22 +282,26 @@ function initAuthApp() {
         throw new Error(data.message || data.error || 'Authentication failed');
       }
 
-      // Save token and display session
       if (data.token) {
         localStorage.setItem('tursiops_token', data.token);
       }
 
       showAlert(mode === 'signup' ? 'Account created successfully!' : 'Signed in successfully!', 'success');
-      showToast(mode === 'signup' ? '✓ Registered with Turso libSQL' : '✓ Authenticated successfully');
+      showToast(mode === 'signup' ? `✓ Welcome ${data.user?.name || email}!` : '✓ Authenticated successfully');
 
       if (data.user) {
-        showUserProfile(data.user);
+        updateHeaderLoggedIn(data.user);
       }
+
+      setTimeout(() => {
+        closeModal();
+      }, 700);
+
     } catch (err) {
       showAlert(err.message || 'An error occurred during authentication.');
     } finally {
-      btnSubmit.disabled = false;
-      submitSpinner.style.display = 'none';
+      btnModalSubmit.disabled = false;
+      modalSpinner.style.display = 'none';
     }
   });
 }

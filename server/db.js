@@ -24,8 +24,8 @@ export const db = createClient({
 
 /**
  * Initializes the database schema.
- * Creates the `users` table with id, email, and password_hash,
- * along with necessary indexes.
+ * Creates the `users` table with id, name, email, and password_hash,
+ * along with necessary indexes and migrations.
  */
 export async function initDb() {
   try {
@@ -35,12 +35,20 @@ export async function initDb() {
     await db.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
+        name TEXT,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Migration: add name column if table existed without it
+    try {
+      await db.execute(`ALTER TABLE users ADD COLUMN name TEXT;`);
+    } catch (e) {
+      // Column already exists, safe to ignore
+    }
 
     // Index on email for fast lookups
     await db.execute(`
@@ -62,7 +70,7 @@ export async function initDb() {
 export async function findUserByEmail(email) {
   const normalizedEmail = email.trim().toLowerCase();
   const result = await db.execute({
-    sql: 'SELECT id, email, password_hash, created_at FROM users WHERE LOWER(email) = ? LIMIT 1',
+    sql: 'SELECT id, name, email, password_hash, created_at FROM users WHERE LOWER(email) = ? LIMIT 1',
     args: [normalizedEmail],
   });
 
@@ -73,6 +81,7 @@ export async function findUserByEmail(email) {
   const row = result.rows[0];
   return {
     id: row.id,
+    name: row.name || null,
     email: row.email,
     password_hash: row.password_hash,
     created_at: row.created_at,
@@ -86,7 +95,7 @@ export async function findUserByEmail(email) {
  */
 export async function findUserById(id) {
   const result = await db.execute({
-    sql: 'SELECT id, email, created_at FROM users WHERE id = ? LIMIT 1',
+    sql: 'SELECT id, name, email, created_at FROM users WHERE id = ? LIMIT 1',
     args: [id],
   });
 
@@ -97,6 +106,7 @@ export async function findUserById(id) {
   const row = result.rows[0];
   return {
     id: row.id,
+    name: row.name || null,
     email: row.email,
     created_at: row.created_at,
   };
@@ -105,25 +115,28 @@ export async function findUserById(id) {
 /**
  * Creates a new user record in Turso
  * @param {Object} params
+ * @param {string} [params.name] developer name
  * @param {string} params.email
  * @param {string} params.passwordHash
  * @param {string} [params.id] optional custom ID
  * @returns {Promise<Object>} the newly created user object (excluding password hash)
  */
-export async function createUser({ email, passwordHash, id = null }) {
+export async function createUser({ name = null, email, passwordHash, id = null }) {
   const userId = id || `usr_${randomUUID()}`;
   const normalizedEmail = email.trim().toLowerCase();
+  const sanitizedName = name ? name.trim() : null;
 
   await db.execute({
     sql: `
-      INSERT INTO users (id, email, password_hash, created_at, updated_at)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO users (id, name, email, password_hash, created_at, updated_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
-    args: [userId, normalizedEmail, passwordHash],
+    args: [userId, sanitizedName, normalizedEmail, passwordHash],
   });
 
   return {
     id: userId,
+    name: sanitizedName,
     email: normalizedEmail,
   };
 }
