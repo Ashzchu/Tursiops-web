@@ -10,123 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Clean Bland Dashboard Styles */
-    .dashboard-layout {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 24px;
-    }
-    .dash-header {
-      margin-bottom: 30px;
-    }
-    .dash-title {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-    .dash-subtitle {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    .dash-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    .dash-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-    }
-    .dash-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .dash-card-title {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-    .dash-card-icon {
-      font-size: 18px;
-    }
-    .dash-card-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      margin-bottom: 6px;
-    }
-    .dash-card-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .dash-table-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 24px;
-    }
-    .dash-table-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-    .dash-table-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .bland-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
-      text-align: left;
-    }
-    .bland-table th {
-      padding: 12px 14px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-medium);
-      font-weight: 500;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .bland-table td {
-      padding: 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 13px;
-    }
-    .status-pill {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
-      font-size: 11px;
-      font-family: var(--font-mono);
-    }
-    .status-pill.active {
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-    .status-pill.idle {
-      background: rgba(148, 163, 184, 0.1);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-
     /* Auth Modal Popup Custom Styles */
     .modal-overlay {
       position: fixed;
@@ -260,7 +143,7 @@
   <div class="ambient-glow glow-top"></div>
   <div class="ambient-glow glow-center"></div>
 
-  <!-- Header with Sign In Button Trigger -->
+  <!-- Minimal Header with Logo & Sign In Button Trigger -->
   <header class="site-header">
     <div class="header-container">
       <div class="brand-group">
@@ -281,93 +164,8 @@
     </div>
   </header>
 
-  <!-- Bland Developer Dashboard Layout -->
-  <main class="dashboard-layout">
-    <div class="dash-header">
-      <h1 class="dash-title">Workspace Directives Dashboard</h1>
-      <p class="dash-subtitle">Overview of active memory nodes, repository directives, and Turso libSQL sync state.</p>
-    </div>
-
-    <!-- Metrics Cards -->
-    <div class="dash-grid">
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <span class="dash-card-title">Memory Directives</span>
-          <span class="dash-card-icon">📌</span>
-        </div>
-        <div class="dash-card-value">24</div>
-        <div class="dash-card-sub">Enforced across AI sessions</div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <span class="dash-card-title">Database Storage</span>
-          <span class="dash-card-icon">🗄️</span>
-        </div>
-        <div class="dash-card-value">Turso</div>
-        <div class="dash-card-sub">libSQL AWS ap-south-1</div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-card-header">
-          <span class="dash-card-title">Connected IDEs</span>
-          <span class="dash-card-icon">💻</span>
-        </div>
-        <div class="dash-card-value">VS Code / Cursor</div>
-        <div class="dash-card-sub">Deep Link Protocol Active</div>
-      </div>
-    </div>
-
-    <!-- Bland Directives Table -->
-    <div class="dash-table-card">
-      <div class="dash-table-header">
-        <h2 class="dash-table-title">Recent Directives Vault</h2>
-        <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Table: users / directives</span>
-      </div>
-
-      <table class="bland-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Target Glob</th>
-            <th>Severity</th>
-            <th>Rule Summary</th>
-            <th>Sync Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>dir_auth_09</td>
-            <td>src/auth/**/*.ts</td>
-            <td style="color: var(--accent-red);">BLOCKER</td>
-            <td>Never downgrade RS256 algorithm</td>
-            <td><span class="status-pill active">SYNCED</span></td>
-          </tr>
-          <tr>
-            <td>dir_db_03</td>
-            <td>src/db/**/*.ts</td>
-            <td style="color: var(--accent-amber);">WARNING</td>
-            <td>Use exponential backoff transaction block</td>
-            <td><span class="status-pill active">SYNCED</span></td>
-          </tr>
-          <tr>
-            <td>dir_api_11</td>
-            <td>src/routes/api.ts</td>
-            <td style="color: var(--accent-cyan);">NOTICE</td>
-            <td>Strict rate limit on public endpoints</td>
-            <td><span class="status-pill active">SYNCED</span></td>
-          </tr>
-          <tr>
-            <td>dir_sec_01</td>
-            <td>**/*.{html,ts}</td>
-            <td style="color: var(--text-secondary);">INFO</td>
-            <td>Always enforce CSP nonces</td>
-            <td><span class="status-pill idle">CACHED</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+  <!-- Clean Blank Canvas (Only Background Glow Visible) -->
+  <main style="min-height: calc(100vh - 62px);"></main>
 
   <!-- Auth Modal Popup -->
   <div class="modal-overlay" id="authModal" aria-hidden="true">
