@@ -493,7 +493,11 @@ body {
   line-height: 1.1;
   letter-spacing: -0.05em;
   font-weight: 700;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
+  pointer-events: none;
   white-space: pre;
   margin: 0;
   transition: transform 0.05s ease-out;
