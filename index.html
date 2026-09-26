@@ -3,834 +3,267 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TURSIOPS — Persistent Coding Memory | Memory That Never Sinks</title>
-  <meta name="description" content="File-specific context and directives across AI coding sessions. Maintain persistent architectural rules across Claude Code, Cursor, Copilot, and CLI agents. Featuring live ASCII ocean simulation.">
-  <meta name="keywords" content="tursiops, persistent coding memory, AI coding directives, ascii art, cline alternative, cursor rules, claude code, developer tools">
-  <meta name="author" content="Ashzchu">
-  <meta property="og:title" content="TURSIOPS — Persistent Coding Memory">
-  <meta property="og:description" content="File-specific context and directives across AI coding sessions. Memory that never sinks.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://github.com/Ashzchu/Tursiops-web">
+  <title>TURSIOPS — Persistent Coding Memory Authentication</title>
+  <meta name="description" content="Sign in or register for Tursiops. Connect your VS Code extension and sync persistent coding directives with Turso libSQL.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Dedicated clean auth portal layout */
+    .auth-page-wrapper {
+      min-height: calc(100vh - 140px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 10;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      box-shadow: var(--shadow-elevated);
+      position: relative;
+    }
+    .auth-brand-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .auth-brand-badge .brand-glyph {
+      font-size: 28px;
+    }
+    .auth-brand-badge .brand-text {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .auth-tabs-nav {
+      display: flex;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 24px;
+      gap: 4px;
+    }
+    .auth-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: center;
+    }
+    .auth-tab-btn.active {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+    .deep-link-notice {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .deep-link-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .deep-link-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+    .auth-alert {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .auth-alert.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .auth-alert.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-code);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: all var(--transition-fast);
+    }
+    .form-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px var(--accent-cyan-glow);
+    }
+    .btn-submit-auth {
+      width: 100%;
+      margin-top: 8px;
+      padding: 11px;
+      font-size: 14px;
+    }
+    .db-status-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .db-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+    .user-profile-card {
+      display: none;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .user-profile-card.active {
+      display: block;
+    }
+  </style>
 </head>
 <body class="dark-theme">
   <!-- Ambient background glow elements -->
   <div class="ambient-glow glow-top"></div>
   <div class="ambient-glow glow-center"></div>
-  <div class="ambient-glow glow-bottom"></div>
 
   <!-- Top Global Navigation Bar -->
   <header class="site-header">
     <div class="header-container">
       <div class="brand-group">
-        <a href="#hero" class="brand-logo">
+        <a href="/" class="brand-logo">
           <span class="brand-glyph">🐬</span>
           <span class="brand-text">TURSIOPS</span>
         </a>
         <span class="version-badge">v1.2.0</span>
       </div>
 
-      <nav class="nav-links">
-        <a href="#ascii-hero" class="nav-link">ASCII Ocean</a>
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#extension" class="nav-link">Extension UI</a>
-        <a href="#demo" class="nav-link">Memory Guard</a>
-        <a href="#terminal" class="nav-link">CLI Simulator</a>
-        <a href="#architecture" class="nav-link">Architecture</a>
-      </nav>
-
       <div class="header-actions">
-        <button class="btn btn-ghost" id="navSignInBtn">Sign In</button>
         <a href="https://github.com/Ashzchu/Tursiops-web" target="_blank" rel="noopener noreferrer" class="btn btn-github">
           <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          <span>Star on GitHub</span>
-          <span class="star-count">★ 1.4k</span>
+          <span>GitHub</span>
         </a>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- HERO SECTION: Modern Developer Landing Page with Live ASCII Ocean & Diving Dolphin -->
-    <section class="hero-section" id="hero">
-      <div class="hero-container">
-        
-        <!-- Announcement Pill -->
-        <div class="hero-announcement">
-          <span class="hero-pill-badge">NEW</span>
-          <span class="hero-pill-text">Tursiops v1.2.0 released &bull; Cross-Agent Directives Engine</span>
-          <a href="#terminal" class="hero-pill-link">Try CLI &rarr;</a>
-        </div>
-
-        <!-- Main Headline -->
-        <h1 class="main-headline">
-          Persistent Coding Memory.<br>
-          <span class="gradient-text">Never Sinks.</span>
-        </h1>
-
-        <!-- Subheading -->
-        <p class="main-subheading">
-          File-specific context and directives across AI coding sessions. Maintain architectural rules, schema invariants, and team conventions across Claude Code, Cursor, Copilot, and CLI agents.
-        </p>
-
-        <!-- Primary Hero Actions -->
-        <div class="hero-cta-group">
-          <a href="#terminal" class="btn btn-primary btn-large">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="4 17 10 11 4 5"></polyline>
-              <line x1="12" y1="19" x2="20" y2="19"></line>
-            </svg>
-            <span>Install CLI</span>
-          </a>
-          <a href="#extension" class="btn btn-secondary btn-large">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <span>Explore Extension UI</span>
-          </a>
-          <a href="https://github.com/Ashzchu/Tursiops-web" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-large">
-            <span>View GitHub</span>
-            <span class="arrow-glyph">&rarr;</span>
-          </a>
-        </div>
-
-        <!-- Quick-copy CLI command -->
-        <div class="cli-quickstart">
-          <span class="cli-prompt">$</span>
-          <code class="cli-code" id="cliInstallCmd">curl -fsSL https://tursiops.dev/install.sh | sh</code>
-          <button class="copy-btn" id="btnCopyInstall" title="Copy install command">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span class="copy-status">Copy</span>
-          </button>
-        </div>
-
-        <!-- Real-Time Interactive ASCII Ocean & Diving Dolphin Showcase -->
-        <div class="ascii-ocean-wrapper" id="ascii-hero">
-          
-          <!-- The Live ASCII Rendering Pre Container -->
-          <div class="ascii-canvas-container" id="asciiCanvasContainer" title="Click on the water to create ripples!">
-            <pre class="ascii-canvas" id="asciiCanvas" aria-label="ASCII Water with Swimming Dolphin Animation"></pre>
-          </div>
-
-          <!-- Ocean Simulation Interactive Controls Bar -->
-          <div class="ocean-controls-bar">
-            <div class="ocean-control-left">
-              <button class="btn btn-sm btn-ocean-action" id="btnLeapDolphin">
-                <span class="ocean-btn-icon">🐬</span>
-                <span>Make Dolphin Leap! (Space)</span>
-              </button>
-              <button class="btn btn-sm btn-ocean-subtle" id="btnToggleSeaState">
-                <span>🌊 Sea: <strong id="seaStateLabel">Swell</strong></span>
-              </button>
-              <button class="btn btn-sm btn-ocean-subtle" id="btnTogglePlay">
-                <span id="playIcon">⏸</span> <span id="playLabel">Pause</span>
-              </button>
-            </div>
-            <div class="ocean-control-right">
-              <span class="ocean-telemetry" id="oceanTelemetry">State: Cruising &bull; Depth: -4.2m &bull; Velocity: 14.2 kn</span>
-              <span class="ocean-fps" id="oceanFps" style="margin-left: 10px;">30 FPS</span>
-            </div>
-          </div>
-
-          <div class="ocean-caption">
-            <span>💡 <strong>Interactive ASCII Canvas:</strong> Click anywhere on the water to generate wave ripples, or press <code>Spacebar</code> to launch the dolphin into a high leap.</span>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECTION: Built For Your Editor — The Reference Extension UI Showcase -->
-    <section class="section extension-section" id="extension">
-      <div class="section-header">
-        <div class="section-tag">Editor Native</div>
-        <h2 class="section-title">Built For Your Editor — VS Code & Cursor Extension</h2>
-        <p class="section-desc">
-          Seamlessly integrate persistent context into your daily IDE workflow. Pin directives, inspect active memories, and control sessions right from your editor sidebar.
-        </p>
+  <main class="auth-page-wrapper">
+    <div class="auth-container">
+      
+      <!-- Brand Header -->
+      <div class="auth-brand-badge">
+        <span class="brand-glyph">🐬</span>
+        <span class="brand-text">TURSIOPS</span>
       </div>
 
-      <div class="extension-showcase-container">
-        
-        <!-- The Clean IDE Extension Frame Recreated From The Reference Screenshot -->
-        <div class="extension-mockup-frame">
-          <div class="mockup-header">
-            <div class="window-controls">
-              <span class="control-dot"></span>
-              <span class="control-dot"></span>
-              <span class="control-dot"></span>
-            </div>
-            <div class="mockup-title">TURSIOPS</div>
-            <div class="mockup-ver">v1.2.0</div>
-          </div>
-
-          <div class="mockup-body">
-            <!-- Sidebar Activity Bar -->
-            <div class="mockup-activity">
-              <button class="mockup-act-btn active" title="Explorer">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
-                </svg>
-              </button>
-              <button class="mockup-act-btn" title="Search">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </button>
-              <button class="mockup-act-btn" title="Git Source Control">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <line x1="6" y1="3" x2="6" y2="15"></line>
-                  <circle cx="18" cy="6" r="3"></circle>
-                  <circle cx="6" cy="18" r="3"></circle>
-                  <path d="M18 9a9 9 0 0 1-9 9"></path>
-                </svg>
-              </button>
-              <button class="mockup-act-btn" title="Memory Extensions">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
-                  <line x1="12" y1="22" x2="12" y2="15.5"></line>
-                  <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
-                </svg>
-              </button>
-              <div class="mockup-act-spacer"></div>
-              <button class="mockup-act-btn" title="Settings">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Center Panel Matching The Extension UI Reference -->
-            <div class="mockup-panel">
-              <div class="mockup-panel-content">
-                
-                <!-- Stylized Monospace Wordmark -->
-                <pre class="mockup-ascii-logo">
- _____ _   _ ____  ____ ___ ___  ____  ____  
-|_   _| | | |  _ \/ ___|_ _/ _ \|  _ \/ ___| 
-  | | | | | | |_) \___ \| | | | | |_) \___ \ 
-  | | | |_| |  _ < ___) | | |_| |  __/ ___) |
-  |_|  \___/|_| \_\____/___\___/|_|   |____/ </pre>
-
-                <h3 class="mockup-heading">Persistent Coding Memory</h3>
-                <p class="mockup-sub">File-specific context and directives across AI coding sessions.</p>
-
-                <div class="mockup-actions">
-                  <button class="btn btn-primary mockup-btn" id="btnExtensionSignIn">Sign In</button>
-                  <button class="btn btn-secondary mockup-btn" id="btnExtensionSignUp">Sign Up</button>
-                  <button class="link-btn mockup-offline" id="btnExtensionOffline">
-                    <span>Continue offline</span>
-                    <span class="arrow-glyph">&rarr;</span>
-                  </button>
-                </div>
-
-                <div class="mockup-cli-tag">
-                  <code>$ curl -fsSL https://tursiops.dev/install.sh | sh</code>
-                </div>
-
-                <div class="mockup-sync-pills">
-                  <span>Syncs across:</span>
-                  <span class="pill">Claude Code</span>
-                  <span class="pill">Cursor</span>
-                  <span class="pill">Antigravity</span>
-                  <span class="pill">Copilot</span>
-                  <span class="pill">Neovim</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mockup-statusbar">
-            <span class="stat-item"><span class="status-led online"></span> Local Vault Ready</span>
-            <span class="stat-item">main</span>
-            <span class="stat-item">UTF-8</span>
-            <span class="stat-spacer"></span>
-            <span class="stat-item">0 Conflicts</span>
-            <span class="stat-item stat-hl">Directives: 24 active</span>
-            <span class="stat-item">Tursiops Engine v1.2.0</span>
-          </div>
-        </div>
-
-        <!-- Extension Value Props Sidebar -->
-        <div class="extension-features-list">
-          <div class="ext-feature-item">
-            <div class="ext-feat-icon">⚡</div>
-            <div class="ext-feat-text">
-              <h4>Zero-Friction Authentication</h4>
-              <p>Sign in with GitHub or your organization's SSO in one click, or operate in 100% air-gapped offline mode.</p>
-            </div>
-          </div>
-
-          <div class="ext-feature-item">
-            <div class="ext-feat-icon">📌</div>
-            <div class="ext-feat-text">
-              <h4>Directives In Editor Gutter</h4>
-              <p>See pinned architectural directives inline next to line numbers. Know immediately why a file was structured a certain way.</p>
-            </div>
-          </div>
-
-          <div class="ext-feature-item">
-            <div class="ext-feat-icon">🛡️</div>
-            <div class="ext-feat-text">
-              <h4>Real-Time AI Diff Validation</h4>
-              <p>Whenever an AI assistant edits code, the Tursiops extension runs your AST directives to ensure no regression slips through.</p>
-            </div>
-          </div>
-
-          <div class="ext-feature-item">
-            <div class="ext-feat-icon">🗄️</div>
-            <div class="ext-feat-text">
-              <h4>Git-Synchronized Vault</h4>
-              <p>Directives commit alongside your code in <code>.tursiops/</code>. New team members inherit full coding memory on <code>git clone</code>.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECTION: Features Grid -->
-    <section class="section features-section" id="features">
-      <div class="section-header">
-        <div class="section-tag">Key Innovations</div>
-        <h2 class="section-title">Why Developers Choose Tursiops</h2>
-        <p class="section-desc">
-          Designed specifically to solve the "amnesia" problem of autonomous AI coding assistants.
-        </p>
+      <!-- Mode Toggle (Sign In / Sign Up) -->
+      <div class="auth-tabs-nav" role="tablist">
+        <button class="auth-tab-btn active" id="btnTabSignIn" type="button">Sign In</button>
+        <button class="auth-tab-btn" id="btnTabSignUp" type="button">Sign Up</button>
       </div>
 
-      <div class="features-grid">
-        
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-          </div>
-          <h3 class="feature-title">File-Scoped Directives</h3>
-          <p class="feature-text">
-            Attach rules directly to paths or globs. When an agent opens <code>src/db/</code>, it automatically receives your exact transaction patterns.
-          </p>
-          <div class="feature-footer-code">
-            <code>.tursiops/directives.json</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </div>
-          <h3 class="feature-title">Cross-Session Continuity</h3>
-          <p class="feature-text">
-            Clear your context window or swap between Claude Code, Cursor, and Copilot without re-prompting rules. Your architectural constraints survive every wipe.
-          </p>
-          <div class="feature-footer-code">
-            <code>Zero Context Eviction</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-              <line x1="1" y1="23" x2="23" y2="23"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">100% Offline & Git-Native</h3>
-          <p class="feature-text">
-            No remote telemetry or forced cloud lock-in. Your memory lives in plain text and SQLite inside your repo. Commits and branches alongside your code.
-          </p>
-          <div class="feature-footer-code">
-            <code>Air-gapped Ready</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-          </div>
-          <h3 class="feature-title">Regression Prevention</h3>
-          <p class="feature-text">
-            Linter-style AST guards detect when an AI model attempts to delete an error handler, revert a schema fix, or ignore established conventions.
-          </p>
-          <div class="feature-footer-code">
-            <code>Deterministic Verification</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="16 18 22 12 16 6"></polyline>
-              <polyline points="8 6 2 12 8 18"></polyline>
-            </svg>
-          </div>
-          <h3 class="feature-title">Minimal Token Overhead</h3>
-          <p class="feature-text">
-            Rather than dumping entire chat transcripts, Tursiops distills directives into high-density tokens injected only when relevant files are touched.
-          </p>
-          <div class="feature-footer-code">
-            <code>&lt; 120 Tokens / Request</code>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-box">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-              <line x1="6" y1="6" x2="6.01" y2="6"></line>
-              <line x1="6" y1="18" x2="6.01" y2="18"></line>
-            </svg>
-          </div>
-          <h3 class="feature-title">Team Memory Merge Driver</h3>
-          <p class="feature-text">
-            Custom git merge driver prevents merge conflicts when multiple engineers and autonomous agents update file directives simultaneously.
-          </p>
-          <div class="feature-footer-code">
-            <code>git config merge.tursiops</code>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECTION: Interactive IDE Demo Section with Directive Guard -->
-    <section class="section demo-section" id="demo">
-      <div class="section-header">
-        <div class="section-tag">Interactive Simulation</div>
-        <h2 class="section-title">See Tursiops in Action Inside Your Editor</h2>
-        <p class="section-desc">
-          How file-level directives and persistent memory preserve decisions when switching between AI prompts and tools.
-        </p>
+      <!-- Dynamic Deep Link Info (if redirect_uri param exists) -->
+      <div class="deep-link-notice" id="deepLinkNotice" style="display: none;">
+        <span class="deep-link-label">IDE Deep Link Target</span>
+        <span class="deep-link-val" id="deepLinkVal">vscode://ashzchu.tursiops/auth</span>
       </div>
 
-      <div class="demo-wrapper">
-        <div class="demo-toolbar">
-          <div class="tab-group" role="tablist">
-            <button class="demo-tab active" data-tab="editor" role="tab" id="tabEditor">
-              <span class="tab-dot"></span> src/auth/session.ts
-            </button>
-            <button class="demo-tab" data-tab="memory" role="tab" id="tabMemory">
-              <span class="tab-dot"></span> .tursiops/directives.json
-            </button>
-            <button class="demo-tab" data-tab="graph" role="tab" id="tabGraph">
-              <span class="tab-dot"></span> Memory Context Graph
-            </button>
-          </div>
-          <div class="demo-actions">
-            <span class="agent-chip"><span class="pulse-indicator"></span> Agent Attached: Claude-3.7-Sonnet</span>
-            <button class="btn btn-sm btn-outline" id="btnSimulatePrompt">Run AI Edit Simulation</button>
-          </div>
-        </div>
+      <!-- Feedback Alert Box -->
+      <div class="auth-alert" id="authAlert" role="alert"></div>
 
-        <div class="demo-viewport">
-          
-          <!-- Pane 1: Active Code Editor with Tursiops Directive Injections -->
-          <div class="demo-pane active" id="paneEditor">
-            <div class="code-editor-layout">
-              <div class="line-numbers" aria-hidden="true">
-                1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21
-              </div>
-              <pre class="code-content"><code><span class="kw">import</span> { <span class="typ">SignJWT</span>, <span class="typ">jwtVerify</span> } <span class="kw">from</span> <span class="str">'jose'</span>;
-<span class="kw">import</span> { <span class="typ">UserSession</span>, <span class="typ">AuthConfig</span> } <span class="kw">from</span> <span class="str">'@/types'</span>;
-
-<span class="comment">// ═══════════════════════════════════════════════════════════════════</span>
-<div class="directive-callout" id="directiveCallout"><span class="directive-badge">🐬 TURSIOPS DIRECTIVE ACTIVE</span>
-<span class="directive-text">CRITICAL RULE [Pinned by Dev, Session #14]: "Never downgrade algorithm from RS256 to HS256. All session tokens must include tenant_id claim."</span>
-<span class="directive-meta">Recorded across 4 AI sessions • 0 regressions detected</span></div><span class="kw">export async function</span> <span class="fn">createSessionToken</span>(user: <span class="typ">UserSession</span>): <span class="typ">Promise</span>&lt;<span class="typ">string</span>&gt; {
-  <span class="kw">const</span> secretKey = <span class="kw">await</span> <span class="fn">importPrivateKey</span>(process.env.<span class="prop">AUTH_PRIVATE_KEY</span>);
-  
-  <span class="kw">return await new</span> <span class="typ">SignJWT</span>({
-    <span class="prop">sub</span>: user.<span class="prop">id</span>,
-    <span class="prop">tenant_id</span>: user.<span class="prop">tenantId</span>, <span class="comment">// &#10003; Enforced by Tursiops</span>
-    <span class="prop">role</span>: user.<span class="prop">role</span>,
-  })
-    .<span class="fn">setProtectedHeader</span>({ <span class="prop">alg</span>: <span class="str">'RS256'</span> }) <span class="comment">// &#10003; Prevents AI downgrade to HS256</span>
-    .<span class="fn">setIssuedAt</span>()
-    .<span class="fn">setExpirationTime</span>(<span class="str">'2h'</span>)
-    .<span class="fn">sign</span>(secretKey);
-}</code></pre>
-            </div>
-            <div class="code-footer-banner">
-              <span class="banner-icon">🛡️</span>
-              <span class="banner-text"><strong>Tursiops Guard:</strong> Prevents AI code generation from regressing architectural rules when the original chat window is closed or cleared.</span>
-            </div>
-          </div>
-
-          <!-- Pane 2: The Directives JSON representation -->
-          <div class="demo-pane" id="paneMemory">
-            <div class="json-viewer">
-              <pre class="code-content"><code>{
-  <span class="str">"version"</span>: <span class="str">"1.2.0"</span>,
-  <span class="str">"project"</span>: <span class="str">"tursiops-web"</span>,
-  <span class="str">"vault"</span>: {
-    <span class="str">"mode"</span>: <span class="str">"local-git"</span>,
-    <span class="str">"encryption"</span>: <span class="str">"AES-GCM-256"</span>,
-    <span class="str">"offline_ready"</span>: <span class="kw">true</span>
-  },
-  <span class="str">"directives"</span>: [
-    {
-      <span class="str">"id"</span>: <span class="str">"dir_auth_09"</span>,
-      <span class="str">"target_glob"</span>: <span class="str">"src/auth/**/*.ts"</span>,
-      <span class="str">"severity"</span>: <span class="str">"BLOCKER"</span>,
-      <span class="str">"rule"</span>: <span class="str">"Never downgrade algorithm from RS256 to HS256. All tokens must include tenant_id."</span>,
-      <span class="str">"created_at"</span>: <span class="str">"2026-09-24T18:12:00Z"</span>,
-      <span class="str">"provenance"</span>: {
-        <span class="str">"agent"</span>: <span class="str">"claude-3.7-sonnet"</span>,
-        <span class="str">"session"</span>: <span class="str">"session-14"</span>,
-        <span class="str">"author"</span>: <span class="str">"Ashzchu"</span>
-      }
-    },
-    {
-      <span class="str">"id"</span>: <span class="str">"dir_db_03"</span>,
-      <span class="str">"target_glob"</span>: <span class="str">"src/db/**/*.ts"</span>,
-      <span class="str">"severity"</span>: <span class="str">"WARNING"</span>,
-      <span class="str">"rule"</span>: <span class="str">"Always execute writes inside a transaction block with exponential backoff."</span>,
-      <span class="str">"created_at"</span>: <span class="str">"2026-09-25T11:40:00Z"</span>
-    }
-  ]
-}</code></pre>
-            </div>
-          </div>
-
-          <!-- Pane 3: Memory Graph Visualizer -->
-          <div class="demo-pane" id="paneGraph">
-            <div class="graph-viewer">
-              <div class="graph-node central-node">
-                <span class="node-icon">🐬</span>
-                <span class="node-title">.tursiops Core Vault</span>
-                <span class="node-sub">Local SQLite + Git</span>
-              </div>
-              <div class="graph-connections">
-                <div class="graph-leaf-card">
-                  <div class="leaf-header">
-                    <span class="leaf-icon">📄</span>
-                    <span class="leaf-name">src/auth/session.ts</span>
-                  </div>
-                  <div class="leaf-status">1 Active Directive • RS256 Guard</div>
-                  <div class="leaf-agent">Last sync: 2m ago (Cursor)</div>
-                </div>
-                <div class="graph-leaf-card">
-                  <div class="leaf-header">
-                    <span class="leaf-icon">📄</span>
-                    <span class="leaf-name">src/db/client.ts</span>
-                  </div>
-                  <div class="leaf-status">Retry Policy • Read Replica Routing</div>
-                  <div class="leaf-agent">Last sync: 1hr ago (Claude Code)</div>
-                </div>
-                <div class="graph-leaf-card">
-                  <div class="leaf-header">
-                    <span class="leaf-icon">📄</span>
-                    <span class="leaf-name">src/routes/api.ts</span>
-                  </div>
-                  <div class="leaf-status">Strict Rate Limiting Directive</div>
-                  <div class="leaf-agent">Last sync: 3hr ago (Terminal CLI)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Interactive Terminal Playground -->
-    <section class="section terminal-section" id="terminal">
-      <div class="section-header">
-        <div class="section-tag">Zero Cloud Lock-in</div>
-        <h2 class="section-title">Test the CLI in WebAssembly</h2>
-        <p class="section-desc">
-          Click any preset command or type your own into the interactive terminal prompt.
-        </p>
+      <!-- Active User Profile Display (when logged in via web session) -->
+      <div class="user-profile-card" id="userProfileCard">
+        <div style="font-size: 13px; font-weight: 600; color: var(--accent-cyan); margin-bottom: 6px;">✓ Session Active (Turso DB)</div>
+        <div style="font-size: 13px; color: var(--text-primary); margin-bottom: 4px;" id="profileEmail"></div>
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); word-break: break-all;" id="profileUserId"></div>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnSignOut" style="margin-top: 12px; width: 100%;">Sign Out</button>
       </div>
 
-      <div class="terminal-shell">
-        <div class="terminal-top">
-          <div class="term-dots">
-            <span class="dot-red"></span>
-            <span class="dot-yellow"></span>
-            <span class="dot-green"></span>
-          </div>
-          <span class="term-title">tursiops-cli v1.2.0 (bash ~ local-repo)</span>
-          <button class="term-clear-btn" id="btnClearTerm">Clear</button>
+      <!-- Main Auth Form -->
+      <form id="mainAuthForm" autocomplete="on">
+        <div class="form-group">
+          <label for="inputEmail">Email Address</label>
+          <input type="email" id="inputEmail" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
         </div>
 
-        <div class="terminal-quick-cmds">
-          <span class="quick-label">Try commands:</span>
-          <button class="cmd-pill" data-cmd="tursiops init">tursiops init</button>
-          <button class="cmd-pill" data-cmd="tursiops status">tursiops status</button>
-          <button class="cmd-pill" data-cmd="tursiops recall src/auth/session.ts">tursiops recall auth</button>
-          <button class="cmd-pill" data-cmd="tursiops remember 'Always use CSP strict nonces'">tursiops remember</button>
-          <button class="cmd-pill" data-cmd="tursiops diff">tursiops diff</button>
-          <button class="cmd-pill" data-cmd="help">help</button>
+        <div class="form-group">
+          <label for="inputPassword" id="labelPassword">Password</label>
+          <input type="password" id="inputPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
         </div>
 
-        <div class="terminal-body" id="termBody">
-          <div class="term-row welcome-row">
-            <span class="term-system">Tursiops Persistent Memory Engine [v1.2.0-release]</span>
-          </div>
-          <div class="term-row">
-            <span class="term-muted">Type <span class="term-hl">'help'</span> or click any command chip above to inspect memory directives.</span>
-          </div>
-          <div class="term-row prompt-row" id="termInputRow">
-            <span class="term-prompt">user@dev:~/repo$</span>
-            <input type="text" class="term-input" id="termInput" autocomplete="off" spellcheck="false" placeholder="Type a command...">
-          </div>
-        </div>
+        <button type="submit" class="btn btn-primary btn-submit-auth" id="btnSubmit">
+          <span id="submitSpinner" style="display: none;">⏳ </span>
+          <span id="submitText">Sign In to Tursiops</span>
+        </button>
+      </form>
+
+      <!-- Turso Connection Status -->
+      <div class="db-status-badge">
+        <span class="db-pulse"></span>
+        <span>Turso libSQL Cloud Connected</span>
       </div>
-    </section>
-
-    <!-- SECTION: Architecture & Specification -->
-    <section class="section arch-section" id="architecture">
-      <div class="section-header">
-        <div class="section-tag">Under the Hood</div>
-        <h2 class="section-title">How Tursiops Operates</h2>
-        <p class="section-desc">
-          A lightweight local daemon and CLI that hooks into your editor's LSP and agent MCP server.
-        </p>
-      </div>
-
-      <div class="workflow-steps">
-        <div class="step-card">
-          <div class="step-number">01</div>
-          <div class="step-content">
-            <h4>Repository Initialization</h4>
-            <p>Runs <code>tursiops init</code> to generate <code>.tursiops/</code>. Indexes project structure, AST symbols, and existing developer guidelines.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-number">02</div>
-          <div class="step-content">
-            <h4>Continuous Session Observation</h4>
-            <p>Monitors prompts and generated diffs. Distills decisions (e.g. "We switched from fetch to axios with custom retry") into structured memory nodes.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-number">03</div>
-          <div class="step-content">
-            <h4>Context-Aware Injection</h4>
-            <p>When any AI agent opens or edits a file, Tursiops matches glob patterns and injects pinned directives straight into the agent's MCP context.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-number">04</div>
-          <div class="step-content">
-            <h4>Conflict-Free Git Versioning</h4>
-            <p>Memories are saved as clean JSON-Lines. When committing or creating pull requests, team memories merge automatically without merge conflicts.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION: Comparison Table -->
-    <section class="section compare-section">
-      <div class="section-header">
-        <div class="section-tag">Comparison</div>
-        <h2 class="section-title">Why Static Prompts Aren't Enough</h2>
-      </div>
-
-      <div class="table-container">
-        <table class="compare-table">
-          <thead>
-            <tr>
-              <th>Feature</th>
-              <th>Vanilla Prompts</th>
-              <th>.cursorrules</th>
-              <th class="th-highlight">TURSIOPS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Cross-Agent Interoperability</td>
-              <td><span class="cross">✕</span> Manual copy-paste</td>
-              <td><span class="warning">~</span> Cursor only</td>
-              <td class="td-highlight"><span class="check">✓</span> Any Agent / MCP / CLI</td>
-            </tr>
-            <tr>
-              <td>File-Specific Scoping</td>
-              <td><span class="cross">✕</span> No file scoping</td>
-              <td><span class="warning">~</span> Global / coarse</td>
-              <td class="td-highlight"><span class="check">✓</span> Exact glob & AST symbol anchors</td>
-            </tr>
-            <tr>
-              <td>Preserves Across Cleared Chat</td>
-              <td><span class="cross">✕</span> Lost immediately</td>
-              <td><span class="warning">~</span> Static only</td>
-              <td class="td-highlight"><span class="check">✓</span> Persistent local vault</td>
-            </tr>
-            <tr>
-              <td>100% Offline & Private</td>
-              <td><span class="warning">~</span> Depends on LLM</td>
-              <td><span class="check">✓</span> Local file</td>
-              <td class="td-highlight"><span class="check">✓</span> Air-gapped SQLite & JSON</td>
-            </tr>
-            <tr>
-              <td>Token Economy</td>
-              <td><span class="cross">✕</span> Re-injects all chat history</td>
-              <td><span class="cross">✕</span> Sent on every prompt</td>
-              <td class="td-highlight"><span class="check">✓</span> JIT (Just-in-time) injection</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Bottom Call-To-Action -->
-    <section class="section cta-section">
-      <div class="cta-box">
-        <div class="cta-ascii">
-          <pre>
-   ______ _   _ _____   _____ _____ ____  ____  ____  
-  |_   _| | | |  _ \ / ___|_ _/ _ \|  _ \/ ___| 
-    | | | | | | |_) |\___ \ | || | | || |_) |\___ \ 
-    |_|  \___/|_| \_\|____/|___|\___/ |_|    |____/ </pre>
-        </div>
-        <h2 class="cta-title">Start Preserving Your AI Code Decisions</h2>
-        <p class="cta-desc">Open source, local-first, zero cloud dependencies. Works out of the box with your current stack.</p>
-        <div class="cta-actions">
-          <a href="https://github.com/Ashzchu/Tursiops-web" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-large">
-            Get Started on GitHub
-          </a>
-          <button class="btn btn-secondary btn-large" id="btnCtaInstall">
-            Copy Install Script
-          </button>
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
-
-  <!-- Developer Footer -->
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-col brand-col">
-        <div class="brand-group">
-          <span class="brand-glyph">🐬</span>
-          <span class="brand-text">TURSIOPS</span>
-        </div>
-        <p class="footer-tagline">Persistent coding memory across AI sessions.</p>
-        <div class="footer-meta">
-          <span>MIT License</span> &bull; <span>v1.2.0</span>
-        </div>
-      </div>
-
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#hero">ASCII Ocean</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#extension">Extension UI</a></li>
-          <li><a href="#demo">Memory Inspector</a></li>
-          <li><a href="#terminal">CLI Playground</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Integrations</h4>
-        <ul>
-          <li><a href="#">Claude Code MCP</a></li>
-          <li><a href="#">Cursor Extension</a></li>
-          <li><a href="#">VS Code Plugin</a></li>
-          <li><a href="#">Neovim Lua Plugin</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Community & Code</h4>
-        <ul>
-          <li><a href="https://github.com/Ashzchu/Tursiops-web" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
-          <li><a href="https://github.com/Ashzchu/Tursiops-web/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a></li>
-          <li><a href="#">Release Notes</a></li>
-          <li><a href="#">Security Policy</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div class="footer-bottom-container">
-        <div class="status-indicator">
-          <span class="status-dot"></span>
-          <span>Engine Status: Operational (Local Offline Vault)</span>
-        </div>
-        <div class="copyright">
-          &copy; 2026 Tursiops. Created by <a href="https://github.com/Ashzchu" target="_blank" rel="noopener noreferrer">Ashzchu</a>.
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Sign In / Sign Up Developer Modal -->
-  <div class="modal-overlay" id="authModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-brand">
-          <span class="modal-glyph">🐬</span>
-          <span class="modal-title" id="modalTitle">Tursiops Authentication</span>
-        </div>
-        <button class="modal-close" id="btnCloseModal" aria-label="Close dialog">&times;</button>
-      </div>
-
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tabSignIn">Sign In</button>
-        <button class="modal-tab" id="tabSignUp">Sign Up</button>
-        <button class="modal-tab" id="tabOffline">Offline Key</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="auth-social">
-          <button class="btn btn-social" id="btnGitAuth">
-            <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
-            Continue with GitHub
-          </button>
-        </div>
-
-        <div class="divider">
-          <span>or continue with email token</span>
-        </div>
-
-        <form class="auth-form" id="authForm" onsubmit="return false;">
-          <div class="form-group">
-            <label for="authEmail">Developer Email</label>
-            <input type="email" id="authEmail" class="form-input" placeholder="developer@domain.com" required>
-          </div>
-
-          <div class="form-group" id="passwordGroup">
-            <label for="authPassword">Vault Keyphrase / Password</label>
-            <input type="password" id="authPassword" class="form-input" placeholder="••••••••••••" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block" id="btnSubmitAuth">
-            Sign In to Memory Vault
-          </button>
-        </form>
-
-        <div class="modal-footer-notice">
-          <button class="link-btn-sm" id="btnModalOfflineSwitch">
-            Prefer not to sign in? Continue 100% offline &rarr;
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Notification Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
