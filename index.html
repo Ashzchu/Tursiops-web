@@ -91,99 +91,152 @@
       </div>
     <!-- 2. HOW IT WORKS SECTION -->
     <section class="content-section" id="how-it-works">
-      <div class="section-tag doto-font">// WORKFLOW ARCHITECTURE</div>
+
       <h2 class="section-heading doto-font">HOW IT WORKS</h2>
-      <p class="section-subheading">One extension. A permanent record for every file.</p>
+      <p class="section-subheading">Set up once, then it runs quietly alongside your agent..</p>
 
       <div class="steps-grid">
         <!-- Step 1 -->
         <div class="step-card">
           <div class="step-number doto-font">01</div>
-          <h3 class="step-title doto-font">You work as usual</h3>
+          <h3 class="step-title doto-font">Sign in, once</h3>
           <p class="step-desc">
-            Tell your agent — Copilot, IBM Bob, whatever you use — what to do. Nothing about your workflow changes.
+            Open the extension → sign in or sign up → you're sent to the website in your browser → after authenticating,
+you're sent straight back to VS Code, signed in. Same flow as Cursor or CodeRabbit.
           </p>
         </div>
 
         <!-- Step 2 -->
         <div class="step-card">
           <div class="step-number doto-font">02</div>
-          <h3 class="step-title doto-font">Tursiops remembers</h3>
+          <h3 class="step-title doto-font">Add your Gemini key</h3>
           <p class="step-desc">
-            The prompt, the diff, the decision behind it, and the validation result get attached to that exact file.
+            Paste in your own Gemini API key. Every refine, summary, and navigation from here on runs on that key —
+nothing else powers the model.
+
           </p>
         </div>
 
         <!-- Step 3 -->
         <div class="step-card">
           <div class="step-number doto-font">03</div>
-          <h3 class="step-title doto-font">It's there next time</h3>
+          <h3 class="step-title doto-font">Then you just code</h3>
           <p class="step-desc">
-            Restart VS Code, come back in a month — run one command and the full history is right there.
+           You prompt your agent — IBM Bob, Antigravity, whatever you use — like always. Tursiops saves that prompt,
+refines it with Gemini into a short, clean version, and stores it.
+
           </p>
         </div>
       </div>
-
-      <!-- Live Code & Command Inspector Box -->
-      <div class="command-box">
+<div class="step-card">
+          <div class="step-number doto-font">04</div>
+          <h3 class="step-title doto-font">Next prompt, full context back</h3>
+          <p class="step-desc">
+          Before your agent builds the next thing, Tursiops forces it to read the refined file first — so it works with everything
+it's already done, instead of the last message or two it actually remembers.
+           </p>
+        </div>
+      </div>
+<!-- INTERACTIVE WORKFLOW TABLE -->
+      <div class="interactive-workflow-box">
+        <!-- Header -->
         <div class="command-box-header">
           <div class="terminal-dots">
             <span class="dot dot-red"></span>
             <span class="dot dot-yellow"></span>
             <span class="dot dot-green"></span>
           </div>
-          <span class="command-box-title doto-font">TURSIOPS MEMORY RECALL IN ACTION</span>
+          <span class="command-box-title doto-font">THE CONTEXT LOOP</span>
         </div>
 
-        <div class="command-box-body">
-          <div class="code-line"><span class="c-prompt">You run:</span> <code class="c-cmd doto-font">Tursiops: Show File Memory</code></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Prompt:</span> <span class="c-val">"Add JWT validation and fix the refresh token expiry"</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Change:</span> <span class="c-val">JWT middleware added &mdash; used jsonwebtoken library</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Validation:</span> <span class="c-success doto-font">Type-check passed</span></div>
+        <!-- Table Rows -->
+        <div class="workflow-rows">
+          
+          <!-- Row 1 -->
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 1</div>
+            <div class="wf-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            <div class="wf-text">saved, refined by <span class="wf-highlight">Gemini</span></div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 2</div>
+            <div class="wf-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            <div class="wf-text">agent reads refined file first <span class="wf-sub-arrow">&rarr;</span> builds with <span class="wf-highlight">full context</span></div>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 3</div>
+            <div class="wf-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            <div class="wf-text">same again, every time</div>
+          </div>
+
         </div>
       </div>
-    </section>
-
     <!-- 3. FEATURES SECTION -->
     <section class="content-section" id="features">
-      <div class="section-tag doto-font">// CAPABILITIES</div>
       <h2 class="section-heading doto-font">FEATURES</h2>
-      <p class="section-subheading">Everything your agent should already remember</p>
+      <p class="section-subheading">Four functions, one panel — each powered entirely by your own Gemini API key.</p>
 
       <div class="features-grid">
         <!-- Feature 1 -->
         <div class="feature-card">
           <div class="feature-icon">📁</div>
-          <h3 class="feature-title doto-font">File-specific memory</h3>
+          <h3 class="feature-title doto-font">Prompt Memory</h3>
           <p class="feature-text">
-            Each file keeps a completely separate history — memory follows the file, not a chat window.
+            AI agents lose context after 2–3 prompts. Prompt Memory stops that: every prompt you give your agent is saved
+to a file, refined into a clean, concise version by Gemini, and your agent is forced to read that file before building
+the next thing — so it always has full context, not a fading memory of the last message or two.
           </p>
         </div>
 
         <!-- Feature 2 -->
         <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3 class="feature-title doto-font">AI-powered changes</h3>
+          <div class="feature-icon">🧭</div>
+          <h3 class="feature-title doto-font">Navigator</h3>
           <p class="feature-text">
-            Ask Tursiops to make a change directly; every proposal comes with a diff before anything is written.
+            Move through your project's files — check something, compare a file, look something up — without disturbing
+your main agent's active session or context. Browsing never resets or interrupts the work in progress.
           </p>
         </div>
 
         <!-- Feature 3 -->
         <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3 class="feature-title doto-font">Auto-validation</h3>
+          <div class="feature-icon">📝</div>
+          <h3 class="feature-title doto-font">Change Summary</h3>
           <p class="feature-text">
-            Type-check and lint run automatically after every approved change, with up to 3 self-correction attempts.
+           Every single prompt's changes are recorded, not just the ones that make it into a git commit. Ask for a summary
+anytime and get a plain-language account of what actually changed and why — without digging through diffs
+yourself.
           </p>
         </div>
 
         <!-- Feature 4 -->
         <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3 class="feature-title doto-font">Local summarization</h3>
+          <div class="feature-icon">🤖</div>
+          <h3 class="feature-title doto-font">MiniGit</h3>
           <p class="feature-text">
-            File summaries run on a local model — routine work costs nothing and stays private.
+           Real commits usually bundle 2–3 prompts' worth of changes, so a bad AI edit inside that window isn't its own
+commit — you can't just revert it. MiniGit checkpoints every prompt's change in between commits, so if the AI
+does something you didn't want, you can retrieve that exact prompt's state back, even without a commit to roll
+back to.
           </p>
         </div>
       </div>
@@ -191,80 +244,135 @@
 
     <!-- 4. SECURITY SECTION -->
     <section class="content-section" id="security">
-      <div class="section-tag doto-font">// ZERO TRUST POLICY</div>
       <h2 class="section-heading doto-font">SECURITY</h2>
-      <p class="section-subheading">Built local-first, on purpose</p>
-
-      <div class="security-list-card">
+      <p class="section-subheading">Local by design — nothing leaves your machine unless you choose.</p>  
+       <div class="security-list-card">
         <div class="sec-row">
           <div class="sec-badge doto-font">01</div>
           <div class="sec-content">
-            <strong class="doto-font">No cloud account, no user database, no telemetry.</strong>
-            <span>Memory lives in your project folder.</span>
+            <strong class="doto-font">Authentication happens through browser so no sneak peak into your password.</strong>
           </div>
         </div>
 
         <div class="sec-row">
           <div class="sec-badge doto-font">02</div>
           <div class="sec-content">
-            <strong class="doto-font">Your API key stays in your OS keychain.</strong>
-            <span>Never in source, settings, or logs.</span>
+            <strong class="doto-font">Your Gemini key is yours alone to work on , no shared api </strong>
           </div>
         </div>
 
         <div class="sec-row">
           <div class="sec-badge doto-font">03</div>
           <div class="sec-content">
-            <strong class="doto-font">Secret files are filtered automatically.</strong>
-            <span><code>.env</code>, <code>.pem</code>, <code>id_rsa</code> never reach any AI model.</span>
+            <strong class="doto-font">Open a workspace VS Code hasn't marked as trusted, and Tursiops disables itself automatically — no file read,
+no prompt sent, no risk taken.</strong>
           </div>
         </div>
 
         <div class="sec-row">
           <div class="sec-badge doto-font">04</div>
           <div class="sec-content">
-            <strong class="doto-font">Every AI change is a diff you approve.</strong>
-            <span>Nothing is written silently.</span>
+            <strong class="doto-font">Per-prompt checkpoints between commits are stored on your machine only — they're for your own rollback, never
+transmitted anywhere.</strong>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 5. USER MANUAL SECTION & INTERACTIVE COMMANDS GUIDE -->
+   <!-- 5. REDESIGNED USER MANUAL SECTION -->
     <section class="content-section" id="manual">
-      <div class="section-tag doto-font">// EXTENSION COMMAND GUIDE</div>
+      <div class="section-tag doto-font">// DOCUMENTATION</div>
       <h2 class="section-heading doto-font">USER MANUAL</h2>
-      <p class="section-subheading">Command Palette & Extension Usage Guide for VS Code</p>
+      <p class="section-subheading highlight-subheading">
+        Set up once — then it runs alongside your normal coding, no habit changes required.
+      </p>
 
-      <div class="manual-container">
-        <!-- Interactive Command Tabs -->
-        <div class="manual-tabs">
-          <button type="button" class="manual-tab-btn active doto-font" id="mTab1">Tursiops: Show File Memory</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab2">Tursiops: Remember Prompt</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab3">Tursiops: Inspect Diff</button>
+      <div class="manual-container new-manual-layout">
+        
+        <!-- BLOCK 1: GETTING STARTED -->
+        <div class="manual-block">
+          <h3 class="m-block-title doto-font">Getting Started</h3>
+          <div class="m-steps-list">
+            
+            <div class="m-step-item">
+              <div class="m-step-num doto-font">1</div>
+              <div class="m-step-text">Install Tursiops from the VS Code Marketplace — it appears in your side panel.</div>
+            </div>
+            
+            <div class="m-step-item">
+              <div class="m-step-num doto-font">2</div>
+              <div class="m-step-text">Sign in or sign up from the panel &rarr; you're redirected to the browser to authenticate &rarr; you're sent straight back to VS Code, signed in.</div>
+            </div>
+            
+            <div class="m-step-item">
+              <div class="m-step-num doto-font">3</div>
+              <div class="m-step-text">Paste in your own <span class="text-glow">Gemini API key</span> when prompted. This key powers every refine, summary, and navigation call — nothing works without it.</div>
+            </div>
+
+          </div>
         </div>
 
-        <!-- Command Detail View -->
-        <div class="manual-detail-card" id="manualDetailContent">
-          <div class="manual-detail-header">
-            <h4 class="manual-cmd-name doto-font" id="cmdName">Tursiops: Show File Memory</h4>
-            <span class="manual-shortcut doto-font">Ctrl+Alt+M / Cmd+Alt+M</span>
-          </div>
-
-          <p class="manual-cmd-desc" id="cmdDesc">
-            Retrieves and displays the full architectural decision log, prompt history, diff changes, and type validation records associated with the currently open file in VS Code.
+        <!-- BLOCK 2: DAILY FLOW CALLOUT -->
+        <div class="manual-callout">
+          <h3 class="m-block-title doto-font">Your daily flow — nothing changes about how you code</h3>
+          <p class="m-callout-text">
+            Keep prompting your agent — IBM Bob, Antigravity, whatever you use — exactly as before. Tursiops runs quietly underneath: saving each prompt, refining it with Gemini, and feeding that context back to your agent before its next build. You don't have to do anything extra for this part.
           </p>
+        </div>
 
-          <div class="manual-example-box">
-            <div class="box-title doto-font">// COMMAND PALETTE SYNTAX</div>
-            <pre class="box-code" id="cmdSyntax"><code>Press Ctrl+Shift+P -> Type "Tursiops: Show File Memory" -> Select active file</code></pre>
+        <!-- BLOCK 3: THE FOUR FUNCTIONS (Interactive Table) -->
+        <div class="manual-block">
+          <h3 class="m-block-title doto-font">Using the four functions</h3>
+          
+          <div class="functions-grid-table">
+            <!-- Table Header -->
+            <div class="f-header doto-font">
+              <div class="f-col">Function</div>
+              <div class="f-col">What it's for</div>
+              <div class="f-col">When to reach for it</div>
+            </div>
+
+            <!-- Row 1 -->
+            <div class="f-row">
+              <div class="f-col f-name doto-font">Prompt Memory</div>
+              <div class="f-col f-desc">See every prompt you've given, refined and organized, with a Remember/Forget switch</div>
+              <div class="f-col f-when">Check what context your agent is actually working from</div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="f-row">
+              <div class="f-col f-name doto-font">Navigator</div>
+              <div class="f-col f-desc">Browse and check files without disturbing your agent's active session</div>
+              <div class="f-col f-when">Looking something up mid-task without breaking flow</div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="f-row">
+              <div class="f-col f-name doto-font">Change Summary</div>
+              <div class="f-col f-desc">Plain-language summary of what changed after any prompt</div>
+              <div class="f-col f-when">Understand a change without reading the raw diff</div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="f-row">
+              <div class="f-col f-name doto-font">MiniGit</div>
+              <div class="f-col f-desc">Retrieve the state from any single prompt between commits</div>
+              <div class="f-col f-when">The agent made a change you didn't want, and it's not its own commit</div>
+            </div>
           </div>
         </div>
+
+        <!-- BLOCK 4: THE ONE HABIT -->
+        <div class="manual-callout habit-callout">
+          <h3 class="m-block-title doto-font">The one habit that matters</h3>
+          <p class="m-callout-text">
+            Just keep prompting your agent normally — Tursiops does the saving and refining on its own. The only manual step is the one-time sign-in and API key setup; everything after that is automatic.
+          </p>
+        </div>
+
       </div>
     </section>
-
-  </main>
-
+    
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
