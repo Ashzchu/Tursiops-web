@@ -168,7 +168,8 @@ function initPortalApp() {
   }
 
   function renderModalSignedInState(user, token) {
-    const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+    const ext = urlParams.get('ext') || 'Conquestcore.tursiops-ai';
+    const rollbackUrl = `vscode://${ext}/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
     unlockModalVsCodeButton(rollbackUrl, user.email);
 
     if (modalCredentialsArea) modalCredentialsArea.style.display = 'none';
@@ -382,6 +383,9 @@ function initPortalApp() {
       const params = new URLSearchParams();
       if (redirect) params.set('redirect', redirect);
       if (redirectUri) params.set('redirect_uri', redirectUri);
+      const ext = urlParams.get('ext');
+      if (ext) body.ext = ext;
+      if (ext) params.set('ext', ext);
       const queryString = params.toString();
       const fetchUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
 
@@ -410,7 +414,8 @@ function initPortalApp() {
 
       showToast(mode === 'signup' ? '✓ Account created! Redirecting to VS Code...' : '✓ Authorized for VS Code!');
 
-      const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
+      const ext = urlParams.get('ext') || 'Conquestcore.tursiops-ai';
+      const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://${ext}/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
 
       // Automatically trigger deep link navigation
       window.location.href = rollbackUrl;
