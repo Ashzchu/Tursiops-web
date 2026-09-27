@@ -1440,3 +1440,231 @@ body {
   transform: translateY(0em);
   transition: transform 0.05s cubic-bezier(0.3, 0, 0, 1);
 }
+/* ==========================================================================
+   REDESIGNED USER MANUAL SECTION (Image Content Match)
+   ========================================================================== */
+
+.highlight-subheading {
+  color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.1);
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-cyan);
+  font-weight: 500;
+}
+
+.new-manual-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.m-block-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+
+/* --- Getting Started Steps --- */
+.m-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.m-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.m-step-item:hover {
+  border-color: var(--accent-cyan);
+  transform: translateX(4px);
+  background: var(--bg-card-hover);
+}
+
+.m-step-num {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--bg-canvas);
+  background: var(--accent-cyan);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.m-step-text {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 4px;
+}
+
+.text-glow {
+  color: #fef08a;
+  font-weight: 600;
+}
+
+/* --- Callout Boxes (Daily Flow & Habit) --- */
+.manual-callout {
+  background: #080d16;
+  border-left: 4px solid var(--accent-blue);
+  padding: 24px 30px;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: var(--shadow-card);
+}
+
+.habit-callout {
+  border-left-color: var(--accent-green);
+}
+
+.manual-callout .m-block-title {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.m-callout-text {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* --- The Four Functions Interactive Table --- */
+.functions-grid-table {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.f-header {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 2fr;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #05080e;
+  border-bottom: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.f-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 2fr;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  transition: background var(--transition-smooth);
+}
+
+.f-row:last-child {
+  border-bottom: none;
+}
+
+/* Left edge neon glow on hover */
+.f-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.f-col {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  transition: color var(--transition-normal);
+}
+
+.f-name {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+/* Table Hover Interactions */
+.f-row:hover {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.f-row:hover::before {
+  opacity: 1;
+}
+
+.f-row:hover .f-name {
+  color: var(--accent-cyan);
+}
+
+.f-row:hover .f-desc,
+.f-row:hover .f-when {
+  color: #ffffff;
+}
+
+/* Responsive Table for Mobile */
+@media (max-width: 768px) {
+  .f-header {
+    display: none; /* Hide headers on small screens */
+  }
+  
+  .f-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 20px;
+  }
+  
+  .f-name {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  
+  .f-desc::before {
+    content: "What it's for: ";
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: var(--font-doto);
+    display: block;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  
+  .f-when::before {
+    content: "When to reach for it: ";
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: var(--font-doto);
+    display: block;
+    font-size: 11px;
+    margin-top: 8px;
+    margin-bottom: 2px;
+  }
+}
