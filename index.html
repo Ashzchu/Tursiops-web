@@ -40,7 +40,7 @@
       </div>
 
       <!-- Action Button (SVG icon + text span for animation) -->
-      <div class="nav-actions">
+      <div class="nav-actions" id="navAuthActions">
         <button type="button" class="nav-btn-auth doto-font" id="btnNavAuth">
           <span class="btn-inner">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -300,30 +300,32 @@
       <form id="popupAuthForm" autocomplete="on">
         <div id="modalActiveSessionContainer"></div>
 
-        <div class="form-group" id="groupName" style="display: none;">
-          <label for="modalName" class="doto-font">Developer Name</label>
-          <input type="text" id="modalName" class="form-input" placeholder="Ashzchu" autocomplete="name">
-        </div>
+        <div id="modalCredentialsArea">
+          <div class="form-group" id="groupName" style="display: none;">
+            <label for="modalName" class="doto-font">Developer Name</label>
+            <input type="text" id="modalName" class="form-input" placeholder="Ashzchu" autocomplete="name">
+          </div>
 
-        <div class="form-group">
-          <label for="modalEmail" class="doto-font">Developer Email</label>
-          <input type="email" id="modalEmail" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
-        </div>
+          <div class="form-group">
+            <label for="modalEmail" class="doto-font">Developer Email</label>
+            <input type="email" id="modalEmail" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
+          </div>
 
-        <div class="form-group">
-          <label for="modalPassword" id="labelModalPassword" class="doto-font">Password / Vault Key</label>
-          <input type="password" id="modalPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
-        </div>
+          <div class="form-group">
+            <label for="modalPassword" id="labelModalPassword" class="doto-font">Password / Vault Key</label>
+            <input type="password" id="modalPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
+          </div>
 
-        <div class="form-group" id="groupConfirmPassword" style="display: none;">
-          <label for="modalConfirmPassword" class="doto-font">Confirm Password</label>
-          <input type="password" id="modalConfirmPassword" class="form-input" placeholder="••••••••••••" autocomplete="new-password">
-        </div>
+          <div class="form-group" id="groupConfirmPassword" style="display: none;">
+            <label for="modalConfirmPassword" class="doto-font">Confirm Password</label>
+            <input type="password" id="modalConfirmPassword" class="form-input" placeholder="••••••••••••" autocomplete="new-password">
+          </div>
 
-        <button type="submit" class="btn btn-primary btn-block doto-font" id="btnModalSubmit">
-          <span id="modalSpinner" style="display: none;">⏳ </span>
-          <span id="modalSubmitText">SIGN IN</span>
-        </button>
+          <button type="submit" class="btn btn-primary btn-block doto-font" id="btnModalSubmit">
+            <span id="modalSpinner" style="display: none;">⏳ </span>
+            <span id="modalSubmitText">SIGN IN</span>
+          </button>
+        </div>
       </form>
 
       <!-- Separate VS Code Integration Button -->

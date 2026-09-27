@@ -356,6 +356,21 @@ router.get(['/vscode-link', '/api/vscode-link', '/api/auth/vscode-link'], async 
 
 /**
  * -------------------------------------------------------------------------
+ * POST /logout & GET /logout
+ * Clears session and cookies
+ * -------------------------------------------------------------------------
+ */
+router.all(['/logout', '/api/logout', '/api/auth/logout'], (req, res) => {
+  res.clearCookie('token');
+  res.clearCookie('tursiops_token');
+  if (req.accepts('html') && !req.xhr && !req.is('json')) {
+    return res.redirect('/signin');
+  }
+  return res.json({ success: true, message: 'Signed out successfully' });
+});
+
+/**
+ * -------------------------------------------------------------------------
  * GET /login & GET /signup
  * -------------------------------------------------------------------------
  */

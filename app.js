@@ -105,6 +105,8 @@ function initPortalApp() {
   const modalVsCodeLabel = document.getElementById('modalVsCodeLabel');
   const modalUnlockHint = document.getElementById('modalUnlockHint');
   const modalActiveSessionContainer = document.getElementById('modalActiveSessionContainer');
+  const modalCredentialsArea = document.getElementById('modalCredentialsArea');
+  const navAuthActions = document.getElementById('navAuthActions');
 
   const deepLinkBanner = document.getElementById('deepLinkBanner');
   const deepLinkTarget = document.getElementById('deepLinkTarget');
@@ -165,6 +167,78 @@ function initPortalApp() {
     }
   }
 
+  function renderModalSignedInState(user, token) {
+    const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+    unlockModalVsCodeButton(rollbackUrl, user.email);
+
+    if (modalCredentialsArea) modalCredentialsArea.style.display = 'none';
+    if (modalActiveSessionContainer) {
+      modalActiveSessionContainer.innerHTML = `
+        <div class="signed-in-panel">
+          <div class="signed-in-user-row">
+            <div class="signed-in-avatar">🐬</div>
+            <div class="signed-in-meta">
+              <div class="signed-in-label doto-font">ACTIVE SESSION</div>
+              <div class="signed-in-email doto-font">${user.email}</div>
+            </div>
+          </div>
+          <button type="button" class="btn-signout doto-font" id="btnModalSignOut">
+            <span>🚪 SIGN OUT</span>
+          </button>
+          <a href="#" class="switch-account-link doto-font" id="btnModalSwitchAccount">Sign in with a different account &rarr;</a>
+        </div>
+      `;
+      document.getElementById('btnModalSignOut')?.addEventListener('click', performModalSignOut);
+      document.getElementById('btnModalSwitchAccount')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (modalCredentialsArea) modalCredentialsArea.style.display = 'block';
+      });
+    }
+
+    // Update nav actions if present
+    if (navAuthActions) {
+      navAuthActions.innerHTML = `
+        <div class="nav-user-badge doto-font">
+          <span class="nav-user-email">${user.email}</span>
+          <button type="button" class="nav-btn-signout" id="navBtnSignOut">SIGN OUT</button>
+        </div>
+      `;
+      document.getElementById('navBtnSignOut')?.addEventListener('click', performModalSignOut);
+    }
+  }
+
+  function renderModalSignedOutState() {
+    if (modalCredentialsArea) modalCredentialsArea.style.display = 'block';
+    if (modalActiveSessionContainer) modalActiveSessionContainer.innerHTML = '';
+    if (navAuthActions) {
+      navAuthActions.innerHTML = `
+        <button type="button" class="nav-btn-auth doto-font" id="btnNavAuth">
+          <span class="btn-inner">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>AUTHORIZE EXTENSION</span>
+          </span>
+        </button>
+      `;
+      document.getElementById('btnNavAuth')?.addEventListener('click', () => openModal('login'));
+    }
+    lockModalVsCodeButton();
+    popupAuthForm.reset();
+    btnModalSubmit.disabled = false;
+    modalSubmitText.textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN';
+  }
+
+  async function performModalSignOut(e) {
+    if (e) e.preventDefault();
+    localStorage.removeItem('tursiops_token');
+    await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+    renderModalSignedOutState();
+    showToast('✓ You have signed out successfully.');
+    showAlert('✓ Signed out successfully.', false);
+  }
+
   // Check stored session in localStorage
   function checkStoredSession() {
     const storedToken = localStorage.getItem('tursiops_token');
@@ -176,25 +250,7 @@ function initPortalApp() {
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if (data && data.valid && data.user) {
-        const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(storedToken)}&email=${encodeURIComponent(data.user.email)}`;
-        unlockModalVsCodeButton(rollbackUrl, data.user.email);
-
-        if (modalActiveSessionContainer) {
-          modalActiveSessionContainer.innerHTML = `
-            <div class="active-session-badge doto-font">
-              <span>✓ Active session: <strong>${data.user.email}</strong></span>
-              <a id="btnModalSwitchAccount">Switch Account</a>
-            </div>
-          `;
-          document.getElementById('btnModalSwitchAccount')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('tursiops_token');
-            modalActiveSessionContainer.innerHTML = '';
-            lockModalVsCodeButton();
-            popupAuthForm.reset();
-            clearAlert();
-          });
-        }
+        renderModalSignedInState(data.user, storedToken);
       }
     })
     .catch(() => {});
@@ -345,16 +401,16 @@ function initPortalApp() {
         localStorage.setItem('tursiops_token', data.token);
       }
 
-      const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(data.user?.email || email)}`;
+      const user = data.user || { email };
+      renderModalSignedInState(user, data.token);
 
-      unlockModalVsCodeButton(rollbackUrl, data.user?.email || email);
-
-      modalSubmitText.textContent = mode === 'signup' ? '✓ ACCOUNT CREATED' : '✓ SIGNED IN';
       showAlert(mode === 'signup' 
         ? '✓ Account created! VS Code integration unlocked.' 
         : '✓ Sign-in successful! VS Code integration unlocked.', false);
 
       showToast(mode === 'signup' ? '✓ Account created! Redirecting to VS Code...' : '✓ Authorized for VS Code!');
+
+      const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
 
       // Automatically trigger deep link navigation
       window.location.href = rollbackUrl;

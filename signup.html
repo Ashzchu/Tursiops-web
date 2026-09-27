@@ -53,7 +53,7 @@
         <a href="/landing#manual" class="nav-item doto-font">USER MANUAL</a>
       </div>
 
-      <div class="nav-actions">
+      <div class="nav-actions" id="navAuthActions">
         <a href="/signin" class="nav-btn-auth doto-font" style="text-decoration:none;">
           <span>SIGN IN</span>
         </a>
@@ -72,7 +72,7 @@
       &gt; Signing in from the Tursiops extension. You’ll be sent back to VS Code once you continue.
     </div>
 
-    <div class="auth-tabs">
+    <div class="auth-tabs" id="authTabsBar">
       <a href="/signin" class="auth-tab-btn doto-font" style="text-decoration:none; text-align:center;">SIGN IN</a>
       <a href="/signup" class="auth-tab-btn active doto-font" style="text-decoration:none; text-align:center;">CREATE ACCOUNT</a>
     </div>
@@ -87,29 +87,33 @@
 
     <!-- Form -->
     <form id="standaloneSignUpForm" action="/signup" method="POST">
-      <div class="form-group">
-        <label for="signupName" class="doto-font">Developer Name</label>
-        <input type="text" id="signupName" name="name" class="form-input" placeholder="Ashzchu" autocomplete="name">
-      </div>
+      <div id="activeSessionContainer"></div>
 
-      <div class="form-group">
-        <label for="signupEmail" class="doto-font">Developer Email</label>
-        <input type="email" id="signupEmail" name="email" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
-      </div>
+      <div id="authCredentialsArea">
+        <div class="form-group">
+          <label for="signupName" class="doto-font">Developer Name</label>
+          <input type="text" id="signupName" name="name" class="form-input" placeholder="Ashzchu" autocomplete="name">
+        </div>
 
-      <div class="form-group">
-        <label for="signupPassword" class="doto-font">Password / Vault Key</label>
-        <input type="password" id="signupPassword" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
-      </div>
+        <div class="form-group">
+          <label for="signupEmail" class="doto-font">Developer Email</label>
+          <input type="email" id="signupEmail" name="email" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
+        </div>
 
-      <div class="form-group">
-        <label for="signupConfirmPassword" class="doto-font">Confirm Password</label>
-        <input type="password" id="signupConfirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
-      </div>
+        <div class="form-group">
+          <label for="signupPassword" class="doto-font">Password / Vault Key</label>
+          <input type="password" id="signupPassword" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+        </div>
 
-      <button type="submit" class="btn btn-primary btn-block doto-font" id="btnSignUpSubmit" style="margin-top:16px;">
-        <span id="signUpSubmitText">CREATE ACCOUNT</span>
-      </button>
+        <div class="form-group">
+          <label for="signupConfirmPassword" class="doto-font">Confirm Password</label>
+          <input type="password" id="signupConfirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block doto-font" id="btnSignUpSubmit" style="margin-top:16px;">
+          <span id="signUpSubmitText">CREATE ACCOUNT</span>
+        </button>
+      </div>
     </form>
 
     <!-- Separate VS Code Integration Button -->
@@ -161,6 +165,9 @@
       const vsCodeIcon = document.getElementById('signUpVsCodeIcon');
       const vsCodeLabel = document.getElementById('signUpVsCodeLabel');
       const unlockHint = document.getElementById('signUpUnlockHint');
+      const activeSessionContainer = document.getElementById('activeSessionContainer');
+      const authCredentialsArea = document.getElementById('authCredentialsArea');
+      const navAuthActions = document.getElementById('navAuthActions');
 
       function unlockVsCodeButton(rollbackUrl, email) {
         btnVsCode.classList.remove('locked');
@@ -184,6 +191,74 @@
         unlockHint.textContent = '> Complete account creation above to unlock VS Code integration.';
       }
 
+      function renderSignedInState(user, token) {
+        const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+        unlockVsCodeButton(rollbackUrl, user.email);
+
+        // Update card
+        if (authCredentialsArea) authCredentialsArea.style.display = 'none';
+        if (activeSessionContainer) {
+          activeSessionContainer.innerHTML = `
+            <div class="signed-in-panel">
+              <div class="signed-in-user-row">
+                <div class="signed-in-avatar">🐬</div>
+                <div class="signed-in-meta">
+                  <div class="signed-in-label doto-font">ACTIVE SESSION</div>
+                  <div class="signed-in-email doto-font">${user.email}</div>
+                </div>
+              </div>
+              <button type="button" class="btn-signout doto-font" id="btnCardSignOut">
+                <span>🚪 SIGN OUT</span>
+              </button>
+              <a href="#" class="switch-account-link doto-font" id="btnSwitchAccount">Create another account &rarr;</a>
+            </div>
+          `;
+
+          document.getElementById('btnCardSignOut')?.addEventListener('click', performSignOut);
+          document.getElementById('btnSwitchAccount')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            authCredentialsArea.style.display = 'block';
+          });
+        }
+
+        // Update nav
+        if (navAuthActions) {
+          navAuthActions.innerHTML = `
+            <div class="nav-user-badge doto-font">
+              <span class="nav-user-email">${user.email}</span>
+              <button type="button" class="nav-btn-signout" id="navBtnSignOut">SIGN OUT</button>
+            </div>
+          `;
+          document.getElementById('navBtnSignOut')?.addEventListener('click', performSignOut);
+        }
+      }
+
+      function renderSignedOutState() {
+        if (authCredentialsArea) authCredentialsArea.style.display = 'block';
+        if (activeSessionContainer) activeSessionContainer.innerHTML = '';
+        if (navAuthActions) {
+          navAuthActions.innerHTML = `
+            <a href="/signin" class="nav-btn-auth doto-font" style="text-decoration:none;">
+              <span>SIGN IN</span>
+            </a>
+          `;
+        }
+        lockVsCodeButton();
+        form.reset();
+        document.getElementById('signUpSubmitText').textContent = 'CREATE ACCOUNT';
+        btnSubmit.disabled = false;
+      }
+
+      async function performSignOut(e) {
+        if (e) e.preventDefault();
+        localStorage.removeItem('tursiops_token');
+        await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+        renderSignedOutState();
+        alertBox.textContent = '✓ You have signed out successfully.';
+        alertBox.className = 'auth-alert-box success';
+        alertBox.style.display = 'block';
+      }
+
       // Check existing session in localStorage
       const storedToken = localStorage.getItem('tursiops_token');
       if (storedToken) {
@@ -193,8 +268,7 @@
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && data.valid && data.user) {
-            const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(storedToken)}&email=${encodeURIComponent(data.user.email)}`;
-            unlockVsCodeButton(rollbackUrl, data.user.email);
+            renderSignedInState(data.user, storedToken);
           }
         })
         .catch(() => {});
@@ -274,15 +348,14 @@
             localStorage.setItem('tursiops_token', data.token);
           }
 
-          const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(data.user?.email || email)}`;
+          const user = data.user || { email, name };
+          renderSignedInState(user, data.token);
 
-          // Unlock the VS Code button immediately
-          unlockVsCodeButton(rollbackUrl, data.user?.email || email);
-
-          document.getElementById('signUpSubmitText').textContent = '✓ ACCOUNT CREATED';
           alertBox.textContent = '✓ Account created! VS Code integration unlocked.';
           alertBox.className = 'auth-alert-box success';
           alertBox.style.display = 'block';
+
+          const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
 
           // Automatically trigger redirect to VS Code
           window.location.href = rollbackUrl;
