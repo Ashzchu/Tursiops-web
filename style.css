@@ -1100,21 +1100,26 @@ body.pixel-theme, body.dark-theme, body {
 }
 
 /* ==========================================================================
-   BOTTOM DOCK — Developers & Social Channels (Bottom Left Aligned)
+   BOTTOM DOCK — Developers & Social Channels (Centrally Aligned)
    ========================================================================== */
 .bottom-dock-section {
   border-top: 1px dashed var(--border-subtle);
   padding: 40px 0 20px;
   position: relative;
   z-index: 10;
+  display: flex;
+  justify-content: center;
 }
 
 .bottom-dock-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 40px;
+  gap: 48px;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: center;
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .dock-column {
