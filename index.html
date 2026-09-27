@@ -3,62 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tursiops — VS Code Extension & Persistent Memory Manual</title>
-  <meta name="description" content="Official authorization portal, user manual, and documentation for Tursiops VS Code extension. One extension, a permanent record for every file.">
+  <title>Tursiops — VS Code Extension & Persistent Memory</title>
+  <meta name="description" content="Official authorization portal, user manual, and documentation for Tursiops VS Code extension.">
   
-  <!-- Fonts: Doto (Dot-Matrix Display), Inter (Body), Fira Code (Mono) -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ==========================================================================
+       1. VARIABLES & BASE RESETS
+       ========================================================================== */
+    :root {
+      --bg-canvas: #06090f;
+      --bg-surface: #0a0f19;
+      --bg-surface-elevated: #111827;
+      --bg-card: rgba(13, 20, 33, 0.85);
+      --bg-card-hover: rgba(18, 28, 46, 0.92);
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --border-bright: rgba(255, 255, 255, 0.28);
+      
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --font-doto: 'Doto', monospace, sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+      
+      --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; color-scheme: dark; }
+    body { background-color: var(--bg-canvas); color: var(--text-primary); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
+    .doto-font { font-family: var(--font-doto) !important; letter-spacing: 0.02em; }
+    
+    /* Ambient Background Glows */
+    .ambient-glow { position: fixed; pointer-events: none; border-radius: 50%; filter: blur(140px); z-index: 0; opacity: 0.55; }
+    .glow-top { top: -140px; left: 50%; transform: translateX(-50%); width: 700px; height: 400px; background: radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 80%); }
+    .glow-right { top: 40%; right: -120px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 75%); }
+    .cyber-grid-overlay { position: fixed; inset: 0; background-image: linear-gradient(to right, rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; mask-image: radial-gradient(ellipse at 50% 30%, black 50%, transparent 90%); -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 50%, transparent 90%); }
+
+    /* ==========================================================================
+       2. CIVIK-STYLE FLOATING NAVBAR (3D Flip)
+       ========================================================================== */
+    .floating-header-wrapper { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 980px; z-index: 1000; pointer-events: none; }
+    .floating-nav-bar { pointer-events: auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 8px 18px; background: rgba(10, 15, 25, 0.82); backdrop-filter: blur(20px); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); transition: border-color 0.3s; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.85); }
+    .floating-nav-bar:hover { border-color: var(--accent-cyan); }
+    
+    .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; perspective: 1000px; }
+    .brand-name { font-weight: 900; font-size: 15px; }
+    .brand-glyph, .brand-name span { display: inline-block; transition: transform 0.55s ease; transform-style: preserve-3d; }
+    .nav-brand:hover .brand-glyph, .nav-brand:hover .brand-name span { transform: rotateY(360deg); }
+    .nav-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); margin-left: 2px; }
+    
+    .nav-menu-links { display: flex; gap: 4px; background: rgba(6,9,15,0.6); padding: 4px; border-radius: var(--radius-pill); border: 1px solid var(--border-subtle); }
+    
+    .nav-item, .nav-btn-auth { position: relative; overflow: hidden; display: inline-flex; perspective: 1000px; z-index: 1; text-decoration: none; align-items: center; }
+    .nav-item { padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--text-muted); border-radius: var(--radius-pill); transition: color 0.3s; }
+    .nav-btn-auth { padding: 8px 16px; border-radius: var(--radius-pill); background: linear-gradient(135deg, var(--accent-cyan), #2563eb); border: none; color: white; font-size: 12px; font-weight: 800; cursor: pointer; }
+    
+    .nav-item::before, .nav-btn-auth::before { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; border-radius: var(--radius-pill); transition: top 0.4s ease; z-index: -1; }
+    .nav-item::before { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); }
+    .nav-btn-auth::before { background: linear-gradient(135deg, #0284c7, #1e3a8a); }
+    
+    .nav-item span, .nav-btn-auth .btn-inner { display: inline-flex; align-items: center; gap: 8px; position: relative; z-index: 2; transition: transform 0.55s ease; transform-style: preserve-3d; pointer-events: none; } /* POINTER EVENTS NONE FIXES JS CLICK ISSUE */
+    
+    .nav-item:hover, .nav-item.active { color: white; }
+    .nav-item:hover::before, .nav-btn-auth:hover::before { top: 0; }
+    .nav-item:hover span, .nav-btn-auth:hover .btn-inner { transform: rotateY(360deg); color: white; }
+    .nav-item.active { background: var(--bg-surface-elevated); box-shadow: 0 2px 8px rgba(0,0,0,0.5); border: 1px solid var(--border-subtle); }
+
+    /* ==========================================================================
+       3. HERO & 3D PUSH BUTTONS
+       ========================================================================== */
+    .main-container { position: relative; z-index: 5; max-width: 900px; margin: 0 auto; padding: 130px 24px 80px; }
+    .hero-section { text-align: center; padding: 40px 0 60px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); font-size: 12px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 24px; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+    .hero-title { font-size: 42px; font-weight: 900; color: white; line-height: 1.2; margin-bottom: 18px; }
+    .gradient-text { background: linear-gradient(120deg, #fff 30%, var(--accent-cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-subtext { font-size: 18px; color: var(--text-secondary); max-width: 680px; margin: 0 auto 32px; }
+    
+    .hero-cta-group { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; padding-top: 14px; }
+    .btn-push { position: relative; display: inline-block; background: transparent; border: none; cursor: pointer; text-decoration: none; }
+    .btn-push-front, .btn-push-edge { border-radius: var(--radius-pill); }
+    .btn-push-edge { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .btn-push-primary .btn-push-edge { background: linear-gradient(to left, #1d4ed8, #1e40af 8%, #1e40af 92%, #1d4ed8); box-shadow: 0 4px 15px rgba(56,189,248,0.15); }
+    .btn-push-secondary .btn-push-edge { background: linear-gradient(to left, #03060a, #0f172a 8%, #0f172a 92%, #03060a); box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+    
+    .btn-push-front { display: block; position: relative; padding: 14px 28px; font-size: 13px; font-weight: 800; transform: translateY(-0.75em); transition: transform 0.1s, background 0.15s, border-color 0.15s; pointer-events: none; } /* POINTER EVENTS NONE FIXES JS CLICK ISSUE */
+    .btn-push-primary .btn-push-front { background: linear-gradient(135deg, var(--accent-cyan), #2563eb); color: white; border: 1px solid rgba(255,255,255,0.15); }
+    .btn-push-secondary .btn-push-front { background: var(--bg-surface-elevated); color: white; border: 1px solid var(--border-medium); }
+    
+    .btn-push:hover .btn-push-front { transform: translateY(-0.375em); }
+    .btn-push:active .btn-push-front { transform: translateY(0em); transition: transform 0.05s; }
+
+    /* ==========================================================================
+       4. SECTIONS (General)
+       ========================================================================== */
+    .content-section { padding: 60px 0; }
+    .section-tag { font-size: 13px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 8px; }
+    .section-heading { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+    .section-subheading { font-size: 17px; color: var(--text-secondary); margin-bottom: 32px; }
+
+    /* ==========================================================================
+       5. INTERACTIVE WORKFLOW TABLE
+       ========================================================================== */
+    .interactive-workflow-box { background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); box-shadow: 0 16px 45px -10px rgba(0,0,0,0.85); overflow: hidden; margin-top: 32px; }
+    .command-box-header { display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: #05080e; border-bottom: 1px solid var(--border-subtle); }
+    .terminal-dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; } .dot-yellow { background: #f59e0b; } .dot-green { background: #10b981; }
+    .command-box-title { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    
+    .workflow-rows { display: flex; flex-direction: column; }
+    .wf-row { display: flex; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); position: relative; transition: background 0.3s; cursor: default; }
+    .wf-row:last-child { border-bottom: none; }
+    .wf-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); opacity: 0; transition: opacity 0.25s; }
+    
+    .wf-step { width: 110px; font-size: 15px; font-weight: 800; color: white; transition: color 0.25s; flex-shrink: 0; }
+    .wf-arrow { width: 50px; color: var(--text-muted); display: flex; align-items: center; transition: transform 0.3s, color 0.25s; flex-shrink: 0; }
+    .wf-text { color: var(--text-secondary); font-size: 14.5px; font-family: var(--font-mono); transition: color 0.25s; }
+    .wf-highlight { color: #fef08a; font-weight: 600; transition: text-shadow 0.25s; }
+    
+    .wf-row:hover { background: rgba(56,189,248,0.06); }
+    .wf-row:hover::before { opacity: 1; }
+    .wf-row:hover .wf-step, .wf-row:hover .wf-arrow { color: var(--accent-cyan); }
+    .wf-row:hover .wf-arrow { transform: translateX(8px); }
+    .wf-row:hover .wf-text { color: white; }
+    .wf-row:hover .wf-highlight { text-shadow: 0 0 8px rgba(254,240,138,0.4); }
+
+    /* ==========================================================================
+       6. GRIDS (Features & Security)
+       ========================================================================== */
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .feature-card { background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 24px; transition: transform 0.2s, background 0.2s; }
+    .feature-card:hover { border-color: var(--accent-cyan); transform: translateY(-2px); background: var(--bg-card-hover); }
+    .feature-icon { font-size: 24px; margin-bottom: 12px; }
+    .feature-title { font-size: 18px; font-weight: 800; color: white; margin-bottom: 8px; }
+    .feature-text { font-size: 14px; color: var(--text-secondary); }
+    
+    .security-list-card { background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+    .sec-row { display: flex; align-items: flex-start; gap: 16px; }
+    .sec-badge { font-size: 16px; font-weight: 900; color: var(--accent-green); background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sec-content { display: flex; flex-direction: column; gap: 4px; font-size: 14.5px; }
+    .sec-content strong { color: white; font-weight: 700; }
+    .sec-content span { color: var(--text-secondary); }
+    .sec-content code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; }
+
+    /* ==========================================================================
+       7. REDESIGNED USER MANUAL
+       ========================================================================== */
+    .highlight-subheading { color: var(--accent-cyan); background: rgba(56,189,248,0.1); display: inline-block; padding: 6px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-cyan); font-weight: 500; }
+    .new-manual-layout { display: flex; flex-direction: column; gap: 40px; }
+    .m-block-title { font-size: 22px; font-weight: 800; color: white; margin-bottom: 20px; }
+    
+    .m-steps-list { display: flex; flex-direction: column; gap: 16px; }
+    .m-step-item { display: flex; align-items: flex-start; gap: 16px; background: var(--bg-card); border: 1px solid var(--border-medium); padding: 20px; border-radius: var(--radius-lg); transition: transform 0.25s, border-color 0.25s; }
+    .m-step-item:hover { border-color: var(--accent-cyan); transform: translateX(4px); background: var(--bg-card-hover); }
+    .m-step-num { font-size: 16px; font-weight: 900; color: var(--bg-canvas); background: var(--accent-cyan); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; flex-shrink: 0; box-shadow: 0 0 12px rgba(56,189,248,0.4); }
+    .m-step-text { color: var(--text-secondary); font-size: 15px; padding-top: 4px; }
+    .text-glow { color: #fef08a; font-weight: 600; }
+    
+    .manual-callout { background: #080d16; border-left: 4px solid var(--accent-blue); padding: 24px 30px; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; box-shadow: 0 16px 45px -10px rgba(0,0,0,0.85); }
+    .habit-callout { border-left-color: var(--accent-green); }
+    .manual-callout .m-block-title { font-size: 18px; margin-bottom: 12px; }
+    .m-callout-text { color: var(--text-secondary); font-size: 15px; }
+    
+    .functions-grid-table { display: flex; flex-direction: column; background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 16px 45px -10px rgba(0,0,0,0.85); }
+    .f-header { display: grid; grid-template-columns: 1.2fr 2fr 2fr; gap: 16px; padding: 16px 24px; background: #05080e; border-bottom: 1px solid var(--border-medium); color: var(--text-muted); font-size: 13px; font-weight: 700; text-transform: uppercase; }
+    .f-row { display: grid; grid-template-columns: 1.2fr 2fr 2fr; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); position: relative; transition: background 0.3s; }
+    .f-row:last-child { border-bottom: none; }
+    .f-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); opacity: 0; transition: opacity 0.2s; }
+    .f-col { font-size: 14.5px; color: var(--text-secondary); transition: color 0.2s; }
+    .f-name { color: white; font-weight: 800; font-size: 15px; }
+    
+    .f-row:hover { background: rgba(56,189,248,0.06); }
+    .f-row:hover::before { opacity: 1; }
+    .f-row:hover .f-name { color: var(--accent-cyan); }
+    .f-row:hover .f-col:not(.f-name) { color: white; }
+
+    /* ==========================================================================
+       8. MODAL, FOOTER & RESPONSIVE
+       ========================================================================== */
+    .site-footer { border-top: 1px solid var(--border-subtle); padding: 32px 24px; margin-top: 40px; }
+    .footer-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .footer-brand { font-size: 14px; font-weight: 800; color: white; }
+    .footer-meta { font-size: 13px; color: var(--text-muted); }
+    
+    .modal-overlay { position: fixed; inset: 0; background: rgba(3,6,10,0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--bg-surface); border: 1px solid var(--border-bright); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 440px; box-shadow: 0 24px 60px rgba(0,0,0,0.9); position: relative; }
+    .modal-close-btn { position: absolute; top: 18px; right: 18px; background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+    .modal-close-btn:hover { color: white; }
+    .modal-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .modal-glyph { font-size: 22px; }
+    .modal-title { font-size: 16px; font-weight: 900; color: white; }
+    .micro-copy-notice, .trust-line-notice { font-size: 12px; color: var(--accent-cyan); margin: 10px 0; }
+    .trust-line-notice { color: var(--text-muted); }
+    
+    .auth-tabs { display: flex; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 4px; margin: 14px 0; gap: 4px; }
+    .auth-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-weight: 800; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; }
+    .auth-tab-btn.active { background: var(--bg-surface-elevated); color: white; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input { width: 100%; background: var(--bg-canvas); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 10px 14px; color: white; outline: none; }
+    .form-input:focus { border-color: var(--accent-cyan); }
+    .btn-block { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-cyan), #2563eb); border: none; border-radius: var(--radius-sm); color: white; font-weight: 700; cursor: pointer; margin-top: 10px; }
+
+    @media (max-width: 820px) {
+      .features-grid, .steps-grid { grid-template-columns: 1fr; }
+      .floating-header-wrapper { top: 12px; width: calc(100% - 24px); }
+      .nav-menu-links { display: none; }
+      .hero-title { font-size: 30px; }
+      .f-header { display: none; }
+      .f-row { grid-template-columns: 1fr; gap: 8px; }
+      .f-desc::before { content: "What it's for: "; font-weight: 700; color: var(--text-muted); display: block; font-size: 11px; margin-bottom: 2px; }
+      .f-when::before { content: "When to reach for it: "; font-weight: 700; color: var(--text-muted); display: block; font-size: 11px; margin-top: 8px; margin-bottom: 2px; }
+    }
+  </style>
 </head>
-<body class="dark-theme">
-  <!-- Dynamic Ambient Backdrop Glows -->
+<body>
+  <!-- Ambient Backdrops -->
   <div class="ambient-glow glow-top" aria-hidden="true"></div>
   <div class="ambient-glow glow-right" aria-hidden="true"></div>
-  <div class="ambient-glow glow-bottom" aria-hidden="true"></div>
   <div class="cyber-grid-overlay" aria-hidden="true"></div>
 
-  <!-- FLOATING HOVER NAVIGATION BAR (Civik-style Floating Suspended Bar) -->
+  <!-- FLOATING NAVBAR -->
   <header class="floating-header-wrapper">
-    <nav class="floating-nav-bar" aria-label="Main Navigation">
-      
-      <!-- Brand Pill -->
+    <nav class="floating-nav-bar">
       <a href="#hero" class="nav-brand">
         <span class="brand-glyph">🐬</span>
         <span class="brand-name doto-font"><span>TURSIOPS</span></span>
-        <span class="nav-status-dot" title="Extension Auth Active"></span>
+        <span class="nav-status-dot"></span>
       </a>
-
-      <!-- Navigation Links (each text wrapped in <span> for 3D flip animation) -->
       <div class="nav-menu-links">
         <a href="#how-it-works" class="nav-item doto-font active"><span>HOW IT WORKS</span></a>
         <a href="#features" class="nav-item doto-font"><span>FEATURES</span></a>
         <a href="#security" class="nav-item doto-font"><span>SECURITY</span></a>
         <a href="#manual" class="nav-item doto-font"><span>USER MANUAL</span></a>
       </div>
-
-      <!-- Action Button (SVG icon + text span for animation) -->
-      <div class="nav-actions" id="navAuthActions">
+      <div class="nav-actions">
+        <!-- Kept original ID for JavaScript -->
         <button type="button" class="nav-btn-auth doto-font" id="btnNavAuth">
           <span class="btn-inner">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span>AUTHORIZE EXTENSION</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>AUTHORIZE</span>
           </span>
         </button>
       </div>
-
     </nav>
   </header>
 
-  <!-- MAIN PAGE CONTENT -->
   <main class="main-container">
 
-    <!-- 1. HERO & EXTENSION OVERVIEW SECTION -->
+    <!-- HERO SECTION -->
     <section class="hero-section" id="hero">
       <div class="hero-badge doto-font">
         <span class="badge-dot"></span> VS CODE EXTENSION PORTAL v1.2.0
@@ -89,267 +305,132 @@
       <h2 class="section-heading doto-font">HOW IT WORKS</h2>
       <p class="section-subheading">One extension. A permanent record for every file.</p>
 
-      <div class="steps-grid">
-        <!-- Step 1 -->
-        <div class="step-card">
-          <div class="step-number doto-font">01</div>
-          <h3 class="step-title doto-font">You work as usual</h3>
-          <p class="step-desc">
-            Tell your agent — Copilot, IBM Bob, whatever you use — what to do. Nothing about your workflow changes.
-          </p>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="step-card">
-          <div class="step-number doto-font">02</div>
-          <h3 class="step-title doto-font">Tursiops remembers</h3>
-          <p class="step-desc">
-            The prompt, the diff, the decision behind it, and the validation result get attached to that exact file.
-          </p>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="step-card">
-          <div class="step-number doto-font">03</div>
-          <h3 class="step-title doto-font">It's there next time</h3>
-          <p class="step-desc">
-            Restart VS Code, come back in a month — run one command and the full history is right there.
-          </p>
-        </div>
-      </div>
-
-      <!-- Live Code & Command Inspector Box -->
-      <div class="command-box">
+      <div class="interactive-workflow-box">
         <div class="command-box-header">
-          <div class="terminal-dots">
-            <span class="dot dot-red"></span>
-            <span class="dot dot-yellow"></span>
-            <span class="dot dot-green"></span>
-          </div>
-          <span class="command-box-title doto-font">TURSIOPS MEMORY RECALL IN ACTION</span>
+          <div class="terminal-dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+          <span class="command-box-title doto-font">THE CONTEXT LOOP</span>
         </div>
-
-        <div class="command-box-body">
-          <div class="code-line"><span class="c-prompt">You run:</span> <code class="c-cmd doto-font">Tursiops: Show File Memory</code></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Prompt:</span> <span class="c-val">"Add JWT validation and fix the refresh token expiry"</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Change:</span> <span class="c-val">JWT middleware added &mdash; used jsonwebtoken library</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Validation:</span> <span class="c-success doto-font">Type-check passed</span></div>
+        <div class="workflow-rows">
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 1</div>
+            <div class="wf-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+            <div class="wf-text">saved, refined by <span class="wf-highlight">Gemini</span></div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 2</div>
+            <div class="wf-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+            <div class="wf-text">agent reads refined file first &rarr; builds with <span class="wf-highlight">full context</span></div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-step doto-font">Prompt 3</div>
+            <div class="wf-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+            <div class="wf-text">same again, every time</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. FEATURES SECTION -->
+    <!-- FEATURES SECTION -->
     <section class="content-section" id="features">
       <div class="section-tag doto-font">// CAPABILITIES</div>
       <h2 class="section-heading doto-font">FEATURES</h2>
       <p class="section-subheading">Everything your agent should already remember</p>
-
       <div class="features-grid">
-        <!-- Feature 1 -->
         <div class="feature-card">
-          <div class="feature-icon">📁</div>
-          <h3 class="feature-title doto-font">File-specific memory</h3>
-          <p class="feature-text">
-            Each file keeps a completely separate history — memory follows the file, not a chat window.
-          </p>
+          <div class="feature-icon">📁</div><h3 class="feature-title doto-font">File-specific memory</h3>
+          <p class="feature-text">Each file keeps a completely separate history — memory follows the file, not a chat window.</p>
         </div>
-
-        <!-- Feature 2 -->
         <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3 class="feature-title doto-font">AI-powered changes</h3>
-          <p class="feature-text">
-            Ask Tursiops to make a change directly; every proposal comes with a diff before anything is written.
-          </p>
+          <div class="feature-icon">⚡</div><h3 class="feature-title doto-font">AI-powered changes</h3>
+          <p class="feature-text">Ask Tursiops to make a change directly; every proposal comes with a diff before anything is written.</p>
         </div>
-
-        <!-- Feature 3 -->
         <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3 class="feature-title doto-font">Auto-validation</h3>
-          <p class="feature-text">
-            Type-check and lint run automatically after every approved change, with up to 3 self-correction attempts.
-          </p>
+          <div class="feature-icon">🛡️</div><h3 class="feature-title doto-font">Auto-validation</h3>
+          <p class="feature-text">Type-check and lint run automatically after every approved change, with up to 3 self-correction attempts.</p>
         </div>
-
-        <!-- Feature 4 -->
         <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3 class="feature-title doto-font">Local summarization</h3>
-          <p class="feature-text">
-            File summaries run on a local model — routine work costs nothing and stays private.
-          </p>
+          <div class="feature-icon">🔒</div><h3 class="feature-title doto-font">Local summarization</h3>
+          <p class="feature-text">File summaries run on a local model — routine work costs nothing and stays private.</p>
         </div>
       </div>
     </section>
 
-    <!-- 4. SECURITY SECTION -->
+    <!-- SECURITY SECTION -->
     <section class="content-section" id="security">
       <div class="section-tag doto-font">// ZERO TRUST POLICY</div>
       <h2 class="section-heading doto-font">SECURITY</h2>
       <p class="section-subheading">Built local-first, on purpose</p>
-
       <div class="security-list-card">
-        <div class="sec-row">
-          <div class="sec-badge doto-font">01</div>
-          <div class="sec-content">
-            <strong class="doto-font">No cloud account, no user database, no telemetry.</strong>
-            <span>Memory lives in your project folder.</span>
-          </div>
-        </div>
-
-        <div class="sec-row">
-          <div class="sec-badge doto-font">02</div>
-          <div class="sec-content">
-            <strong class="doto-font">Your API key stays in your OS keychain.</strong>
-            <span>Never in source, settings, or logs.</span>
-          </div>
-        </div>
-
-        <div class="sec-row">
-          <div class="sec-badge doto-font">03</div>
-          <div class="sec-content">
-            <strong class="doto-font">Secret files are filtered automatically.</strong>
-            <span><code>.env</code>, <code>.pem</code>, <code>id_rsa</code> never reach any AI model.</span>
-          </div>
-        </div>
-
-        <div class="sec-row">
-          <div class="sec-badge doto-font">04</div>
-          <div class="sec-content">
-            <strong class="doto-font">Every AI change is a diff you approve.</strong>
-            <span>Nothing is written silently.</span>
-          </div>
-        </div>
+        <div class="sec-row"><div class="sec-badge doto-font">01</div><div class="sec-content"><strong class="doto-font">No cloud account, no user database, no telemetry.</strong><span>Memory lives in your project folder.</span></div></div>
+        <div class="sec-row"><div class="sec-badge doto-font">02</div><div class="sec-content"><strong class="doto-font">Your API key stays in your OS keychain.</strong><span>Never in source, settings, or logs.</span></div></div>
+        <div class="sec-row"><div class="sec-badge doto-font">03</div><div class="sec-content"><strong class="doto-font">Secret files are filtered automatically.</strong><span><code>.env</code>, <code>.pem</code> never reach any AI model.</span></div></div>
       </div>
     </section>
 
-    <!-- 5. USER MANUAL SECTION & INTERACTIVE COMMANDS GUIDE -->
+    <!-- REDESIGNED USER MANUAL -->
     <section class="content-section" id="manual">
-      <div class="section-tag doto-font">// EXTENSION COMMAND GUIDE</div>
+      <div class="section-tag doto-font">// DOCUMENTATION</div>
       <h2 class="section-heading doto-font">USER MANUAL</h2>
-      <p class="section-subheading">Command Palette & Extension Usage Guide for VS Code</p>
-
-      <div class="manual-container">
-        <!-- Interactive Command Tabs -->
-        <div class="manual-tabs">
-          <button type="button" class="manual-tab-btn active doto-font" id="mTab1">Tursiops: Show File Memory</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab2">Tursiops: Remember Prompt</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab3">Tursiops: Inspect Diff</button>
+      <p class="section-subheading highlight-subheading">Set up once — then it runs alongside your normal coding, no habit changes required.</p>
+      <div class="new-manual-layout">
+        <div class="manual-block">
+          <h3 class="m-block-title doto-font">Getting Started</h3>
+          <div class="m-steps-list">
+            <div class="m-step-item"><div class="m-step-num doto-font">1</div><div class="m-step-text">Install Tursiops from the VS Code Marketplace — it appears in your side panel.</div></div>
+            <div class="m-step-item"><div class="m-step-num doto-font">2</div><div class="m-step-text">Sign in or sign up from the panel &rarr; you're redirected to the browser to authenticate &rarr; you're sent straight back to VS Code, signed in.</div></div>
+            <div class="m-step-item"><div class="m-step-num doto-font">3</div><div class="m-step-text">Paste in your own <span class="text-glow">Gemini API key</span> when prompted. This key powers every refine, summary, and navigation call.</div></div>
+          </div>
         </div>
-
-        <!-- Command Detail View -->
-        <div class="manual-detail-card" id="manualDetailContent">
-          <div class="manual-detail-header">
-            <h4 class="manual-cmd-name doto-font" id="cmdName">Tursiops: Show File Memory</h4>
-            <span class="manual-shortcut doto-font">Ctrl+Alt+M / Cmd+Alt+M</span>
+        <div class="manual-callout">
+          <h3 class="m-block-title doto-font">Your daily flow — nothing changes</h3>
+          <p class="m-callout-text">Keep prompting your agent exactly as before. Tursiops runs quietly underneath: saving each prompt, refining it with Gemini, and feeding that context back to your agent before its next build. You don't have to do anything extra.</p>
+        </div>
+        <div class="manual-block">
+          <h3 class="m-block-title doto-font">Using the four functions</h3>
+          <div class="functions-grid-table">
+            <div class="f-header doto-font"><div class="f-col">Function</div><div class="f-col">What it's for</div><div class="f-col">When to reach for it</div></div>
+            <div class="f-row"><div class="f-col f-name doto-font">Prompt Memory</div><div class="f-col f-desc">See every prompt you've given, refined and organized</div><div class="f-col f-when">Check what context your agent is actually working from</div></div>
+            <div class="f-row"><div class="f-col f-name doto-font">Navigator</div><div class="f-col f-desc">Browse and check files without disturbing your agent</div><div class="f-col f-when">Looking something up mid-task without breaking flow</div></div>
+            <div class="f-row"><div class="f-col f-name doto-font">Change Summary</div><div class="f-col f-desc">Plain-language summary of what changed after any prompt</div><div class="f-col f-when">Understand a change without reading the raw diff</div></div>
+            <div class="f-row"><div class="f-col f-name doto-font">MiniGit</div><div class="f-col f-desc">Retrieve the state from any single prompt between commits</div><div class="f-col f-when">The agent made a change you didn't want</div></div>
           </div>
-
-          <p class="manual-cmd-desc" id="cmdDesc">
-            Retrieves and displays the full architectural decision log, prompt history, diff changes, and type validation records associated with the currently open file in VS Code.
-          </p>
-
-          <div class="manual-example-box">
-            <div class="box-title doto-font">// COMMAND PALETTE SYNTAX</div>
-            <pre class="box-code" id="cmdSyntax"><code>Press Ctrl+Shift+P -> Type "Tursiops: Show File Memory" -> Select active file</code></pre>
-          </div>
+        </div>
+        <div class="manual-callout habit-callout">
+          <h3 class="m-block-title doto-font">The one habit that matters</h3>
+          <p class="m-callout-text">Just keep prompting your agent normally — Tursiops does the saving and refining on its own. The only manual step is the one-time sign-in and API key setup; everything after that is automatic.</p>
         </div>
       </div>
     </section>
-
   </main>
 
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand doto-font">🐬 TURSIOPS EXTENSION PORTAL</div>
-      <div class="footer-meta">
-        Source on GitHub &bull; Requires VS Code 1.138.0+ &bull; Built Local-First
-      </div>
+      <div class="footer-meta">Source on GitHub &bull; Requires VS Code 1.138.0+ &bull; Built Local-First</div>
     </div>
   </footer>
 
-  <!-- EXTENSION AUTHORIZATION MODAL -->
+  <!-- EXTENSION AUTHORIZATION MODAL (Critical for app.js) -->
   <div class="modal-overlay" id="authModal" aria-hidden="true">
     <div class="modal-card">
-      <button class="modal-close-btn" id="btnCloseModal" aria-label="Close dialog">&times;</button>
-
-      <div class="modal-brand">
-        <span class="modal-glyph">🐬</span>
-        <h3 class="modal-title doto-font" id="modalHeading">AUTHORIZE VS CODE EXTENSION</h3>
-      </div>
-
-      <div class="micro-copy-notice doto-font">
-        &gt; Signing in from the Tursiops extension. You'll be sent back to VS Code once you continue.
-      </div>
-
+      <button class="modal-close-btn" id="btnCloseModal" aria-label="Close">&times;</button>
+      <div class="modal-brand"><span class="modal-glyph">🐬</span><h3 class="modal-title doto-font">AUTHORIZE EXTENSION</h3></div>
+      <div class="micro-copy-notice doto-font">&gt; You'll be sent back to VS Code once you continue.</div>
       <div class="auth-tabs">
-        <button type="button" class="auth-tab-btn active doto-font" id="modalTabSignIn">SIGN IN</button>
-        <button type="button" class="auth-tab-btn doto-font" id="modalTabSignUp">CREATE ACCOUNT</button>
+        <button type="button" class="auth-tab-btn active doto-font">SIGN IN</button>
+        <button type="button" class="auth-tab-btn doto-font">CREATE ACCOUNT</button>
       </div>
-
-      <!-- Deep link notification banner if redirect_uri is in URL -->
-      <div class="deep-link-banner doto-font" id="deepLinkBanner" style="display: none;">
-        <span>VS Code Callback Target: </span><span id="deepLinkTarget"></span>
-      </div>
-
-      <!-- Error / Success Alert -->
-      <div class="auth-alert-box" id="authAlertBox"></div>
-
-      <!-- Form -->
-      <form id="popupAuthForm" autocomplete="on">
-        <div id="modalActiveSessionContainer"></div>
-
-        <div id="modalCredentialsArea">
-          <div class="form-group" id="groupName" style="display: none;">
-            <label for="modalName" class="doto-font">Developer Name</label>
-            <input type="text" id="modalName" class="form-input" placeholder="Ashzchu" autocomplete="name">
-          </div>
-
-          <div class="form-group">
-            <label for="modalEmail" class="doto-font">Developer Email</label>
-            <input type="email" id="modalEmail" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
-          </div>
-
-          <div class="form-group">
-            <label for="modalPassword" id="labelModalPassword" class="doto-font">Password / Vault Key</label>
-            <input type="password" id="modalPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
-          </div>
-
-          <div class="form-group" id="groupConfirmPassword" style="display: none;">
-            <label for="modalConfirmPassword" class="doto-font">Confirm Password</label>
-            <input type="password" id="modalConfirmPassword" class="form-input" placeholder="••••••••••••" autocomplete="new-password">
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block doto-font" id="btnModalSubmit">
-            <span id="modalSpinner" style="display: none;">⏳ </span>
-            <span id="modalSubmitText">SIGN IN</span>
-          </button>
-        </div>
+      <form id="popupAuthForm">
+        <div class="form-group"><label class="doto-font">Developer Email</label><input type="email" class="form-input" required></div>
+        <div class="form-group"><label class="doto-font">Password / Vault Key</label><input type="password" class="form-input" required></div>
+        <button type="submit" class="btn-block doto-font">AUTHORIZE &amp; RETURN</button>
       </form>
-
-      <!-- Separate VS Code Integration Button -->
-      <div class="auth-action-divider doto-font">
-        <span>VS CODE EXTENSION ACTION</span>
-      </div>
-
-      <a href="#" class="btn btn-block btn-open-vscode locked doto-font" id="btnModalOpenVsCode" aria-disabled="true" role="button">
-        <span class="btn-icon" id="modalVsCodeIcon">🔒</span>
-        <span class="btn-label" id="modalVsCodeLabel">OPEN IN VS CODE (SIGN IN FIRST)</span>
-      </a>
-      <div class="vscode-unlock-hint doto-font" id="modalUnlockHint">
-        &gt; Complete sign in above to unlock VS Code integration.
-      </div>
-
-      <div class="trust-line-notice doto-font">
-        &gt; Your data stays local. This sign-in is only for AI-assisted changes — no cloud account otherwise.
-      </div>
+      <div class="trust-line-notice doto-font">&gt; Your data stays local.</div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div class="toast doto-font" id="toast" role="status" aria-live="polite"></div>
-
+  <!-- LINK TO YOUR JAVASCRIPT FILE -->
   <script src="app.js"></script>
 </body>
 </html>
