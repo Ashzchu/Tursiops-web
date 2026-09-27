@@ -192,8 +192,7 @@
       }
 
       function renderSignedInState(user, token) {
-        const ext = urlParams.get('ext') || 'Conquestcore.tursiops-ai';
-        const rollbackUrl = `vscode://${ext}/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+        const rollbackUrl = `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
         unlockVsCodeButton(rollbackUrl, user.email);
 
         // Update card
@@ -356,8 +355,7 @@
           alertBox.className = 'auth-alert-box success';
           alertBox.style.display = 'block';
 
-          const ext = urlParams.get('ext') || 'Conquestcore.tursiops-ai';
-          const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://${ext}/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
+          const rollbackUrl = data.redirect_url || data.vscode_link || `vscode://tursiops-ai.tursiops/auth?token=${encodeURIComponent(data.token)}&email=${encodeURIComponent(user.email)}`;
 
           // Automatically trigger redirect to VS Code
           window.location.href = rollbackUrl;

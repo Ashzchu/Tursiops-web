@@ -126,9 +126,8 @@ export function buildCallbackUrl(redirectUri, token, extraParams = {}) {
  * @param {string} email - Authenticated user email from Turso DB
  * @returns {string} Fully formatted deep link
  */
-export function buildVsCodeRollbackUrl(token, email, ext = 'Conquestcore.tursiops-ai') {
+export function buildVsCodeRollbackUrl(token, email) {
   if (!token) throw new Error('token is required to build VS Code rollback URL');
   const safeEmail = email ? encodeURIComponent(email.trim()) : '';
-  const targetExt = ext || 'Conquestcore.tursiops-ai';
-  return `vscode://${targetExt}/auth?token=${token}&email=${safeEmail}`;
+  return `vscode://tursiops-ai.tursiops/auth?token=${token}&email=${safeEmail}`;
 }

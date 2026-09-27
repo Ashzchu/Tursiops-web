@@ -53,9 +53,8 @@ export function resolveRedirectUrl(req, token, user) {
     return buildCallbackUrl(redirectUri, token, { email: user.email });
   }
 
-  const ext = req.query.ext || req.body?.ext || 'Conquestcore.tursiops-ai';
   // Always generate the VS Code rollback link using authenticated user's email
-  return buildVsCodeRollbackUrl(token, user.email, ext);
+  return buildVsCodeRollbackUrl(token, user.email);
 }
 
 /**
@@ -176,7 +175,7 @@ router.post(['/signup', '/api/signup'], async (req, res, next) => {
 
     // 6. Handle Response / Deep Link Redirection
     const redirectUrl = resolveRedirectUrl(req, token, newUser);
-    const vscodeLink = buildVsCodeRollbackUrl(token, newUser.email, req.query.ext || req.body?.ext || 'Conquestcore.tursiops-ai');
+    const vscodeLink = buildVsCodeRollbackUrl(token, newUser.email);
 
     if (isJsonRequest(req)) {
       return res.status(201).json({
@@ -283,7 +282,7 @@ router.post(['/login', '/signin', '/api/login', '/api/signin'], async (req, res,
 
     // 5. Handle Response / Deep Link Redirection
     const redirectUrl = resolveRedirectUrl(req, token, user);
-    const vscodeLink = buildVsCodeRollbackUrl(token, user.email, req.query.ext || req.body?.ext || 'Conquestcore.tursiops-ai');
+    const vscodeLink = buildVsCodeRollbackUrl(token, user.email);
 
     if (isJsonRequest(req)) {
       return res.status(200).json({
@@ -343,7 +342,7 @@ router.get(['/vscode-link', '/api/vscode-link', '/api/auth/vscode-link'], async 
       return res.status(404).json({ error: 'User Not Found', message: 'User does not exist in database' });
     }
 
-    const rollbackUrl = buildVsCodeRollbackUrl(token, user.email, req.query.ext || req.body?.ext || 'Conquestcore.tursiops-ai');
+    const rollbackUrl = buildVsCodeRollbackUrl(token, user.email);
     return res.json({
       success: true,
       email: user.email,
