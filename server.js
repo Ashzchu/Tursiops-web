@@ -46,14 +46,14 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (server-to-server, curl, VS Code extension)
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    if (!origin || allowedOrigins.includes(origin) || origin.startsWith('vscode-') || origin.startsWith('cursor-')) return cb(null, true);
     return cb(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST'],
   credentials: true,
 }));
 
-// Rate limiter for auth endpoints
+// Rate limiter for auth endpoints (brute-force prevention on login and signup)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,
@@ -61,11 +61,11 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many attempts, please try again later.' },
 });
-app.use('/api/auth', authLimiter);
-app.use('/api', authLimiter);
-app.use('/login', authLimiter);
-app.use('/signin', authLimiter);
-app.use('/signup', authLimiter);
+app.use([
+  '/login', '/signin', '/signup',
+  '/api/login', '/api/signin', '/api/signup',
+  '/api/auth/login', '/api/auth/signin', '/api/auth/signup',
+], authLimiter);
 
 // Body parsing — 10 kb limit to prevent oversized payloads
 app.use(express.json({ limit: '10kb' }));

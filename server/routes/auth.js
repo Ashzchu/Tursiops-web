@@ -2,7 +2,7 @@
  * Authentication Route Handlers: /signup, /login, and VS Code Deep Link Redirection
  */
 import { Router } from 'express';
-import { findUserByEmail, createUser, findUserById } from '../db.js';
+import { findUserByEmail, createUser, findUserById, getUserGeminiKey, setUserGeminiKey } from '../db.js';
 import { hashPassword, verifyPassword, generateToken, verifyToken, buildCallbackUrl, buildVsCodeRollbackUrl } from '../utils/auth.js';
 
 const router = Router();
@@ -351,6 +351,78 @@ router.get(['/vscode-link', '/api/vscode-link', '/api/auth/vscode-link'], async 
     });
   } catch (err) {
     return res.status(401).json({ error: 'Unauthorized', message: 'Invalid or expired token' });
+  }
+});
+
+/**
+ * Helper to safely extract bearer token from authorization header
+ */
+function extractBearerToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return null;
+  return authHeader.replace(/^Bearer\s+/i, '').trim();
+}
+
+/**
+ * -------------------------------------------------------------------------
+ * GET /api/user/gemini-key
+ * Verifies JWT → looks up user in Turso → returns their stored key
+ * -------------------------------------------------------------------------
+ */
+router.get(['/user/gemini-key', '/api/user/gemini-key', '/api/auth/user/gemini-key'], async (req, res) => {
+  const token = extractBearerToken(req);
+  if (!token) return res.status(401).json({ error: 'No token' });
+
+  let payload;
+  try {
+    payload = verifyToken(token);
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  if (!payload) return res.status(401).json({ error: 'Invalid token' });
+
+  const userId = payload.userId || payload.id || payload.sub;
+  const email = payload.email || null;
+
+  try {
+    const key = await getUserGeminiKey(userId, email);
+    return res.json({ geminiKey: key ?? null });
+  } catch (err) {
+    console.error('[GEMINI-KEY GET ERROR]', err);
+    return res.status(500).json({ error: 'Failed to retrieve Gemini key' });
+  }
+});
+
+/**
+ * -------------------------------------------------------------------------
+ * POST /api/user/gemini-key
+ * Verifies JWT → saves Gemini key to Turso for the authenticated user
+ * -------------------------------------------------------------------------
+ */
+router.post(['/user/gemini-key', '/api/user/gemini-key', '/api/auth/user/gemini-key'], async (req, res) => {
+  const token = extractBearerToken(req);
+  if (!token) return res.status(401).json({ error: 'No token' });
+
+  let payload;
+  try {
+    payload = verifyToken(token);
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  if (!payload) return res.status(401).json({ error: 'Invalid token' });
+
+  const userId = payload.userId || payload.id || payload.sub;
+  const email = payload.email || null;
+  const geminiKey = req.body?.geminiKey ?? req.body?.gemini_key ?? null;
+
+  try {
+    await setUserGeminiKey(userId, geminiKey, email);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[GEMINI-KEY POST ERROR]', err);
+    return res.status(500).json({ error: 'Failed to save Gemini key' });
   }
 });
 

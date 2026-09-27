@@ -47,6 +47,7 @@ export function generateToken(user) {
   const payload = {
     sub: user.id,
     id: user.id,
+    userId: user.id,
     email: user.email,
     iss: 'tursiops-auth',
   };

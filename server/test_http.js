@@ -209,8 +209,105 @@ async function runHttpTests() {
     if (h1.status !== 200 || h2.status !== 200) throw new Error('Test 9 failed: health check failed');
     console.log('✓ Test 9 Passed: Health check endpoints return 200 OK.');
 
+    // -----------------------------------------------------------------------
+    // Test 10a: GET /api/user/gemini-key without token -> 401 Unauthorized
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10a: GET /api/user/gemini-key without token ---');
+    const noTokenRes = await fetch(`${baseUrl}/api/user/gemini-key`);
+    console.log(`Status: ${noTokenRes.status} (Expected: 401)`);
+    const noTokenData = await noTokenRes.json();
+    if (noTokenRes.status !== 401 || !noTokenData.error) {
+      throw new Error('Test 10a failed: Expected 401 with error message');
+    }
+    console.log('✓ Test 10a Passed: 401 returned for unauthenticated request.');
+
+    // -----------------------------------------------------------------------
+    // Test 10b: GET /api/user/gemini-key with Bearer token (fresh user, null key)
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10b: GET /api/user/gemini-key with Bearer token (initial null) ---');
+    const getKeyRes1 = await fetch(`${baseUrl}/api/user/gemini-key`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Status: ${getKeyRes1.status} (Expected: 200)`);
+    const getKeyData1 = await getKeyRes1.json();
+    console.log('Gemini Key response:', getKeyData1);
+    if (getKeyRes1.status !== 200 || getKeyData1.geminiKey !== null) {
+      throw new Error(`Test 10b failed: Expected { geminiKey: null }, got: ${JSON.stringify(getKeyData1)}`);
+    }
+    console.log('✓ Test 10b Passed: Initial geminiKey is null as expected.');
+
+    // -----------------------------------------------------------------------
+    // Test 10c: POST /api/user/gemini-key saving key
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10c: POST /api/user/gemini-key saving key ---');
+    const testApiKey = 'AIzaSyDemoKey_TursoVault_2026';
+    const setKeyRes = await fetch(`${baseUrl}/api/user/gemini-key`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ geminiKey: testApiKey }),
+    });
+    console.log(`Status: ${setKeyRes.status} (Expected: 200)`);
+    const setKeyData = await setKeyRes.json();
+    console.log('Save response:', setKeyData);
+    if (setKeyRes.status !== 200 || !setKeyData.ok) {
+      throw new Error(`Test 10c failed: Expected { ok: true }, got: ${JSON.stringify(setKeyData)}`);
+    }
+    console.log('✓ Test 10c Passed: Successfully saved Gemini key.');
+
+    // -----------------------------------------------------------------------
+    // Test 10d: GET /api/user/gemini-key verifying persisted key
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10d: GET /api/user/gemini-key verifying persisted key ---');
+    const getKeyRes2 = await fetch(`${baseUrl}/api/user/gemini-key`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Status: ${getKeyRes2.status} (Expected: 200)`);
+    const getKeyData2 = await getKeyRes2.json();
+    console.log('Gemini Key retrieved:', getKeyData2);
+    if (getKeyRes2.status !== 200 || getKeyData2.geminiKey !== testApiKey) {
+      throw new Error(`Test 10d failed: Expected { geminiKey: '${testApiKey}' }, got: ${JSON.stringify(getKeyData2)}`);
+    }
+    console.log('✓ Test 10d Passed: Saved key matched persisted key from Turso.');
+
+    // -----------------------------------------------------------------------
+    // Test 10e: POST /api/user/gemini-key with snake_case gemini_key & alias /user/gemini-key
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10e: POST /user/gemini-key alias with snake_case ---');
+    const updatedApiKey = 'AIzaSyUpdatedKey_456789';
+    const setKeyRes2 = await fetch(`${baseUrl}/user/gemini-key`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ gemini_key: updatedApiKey }),
+    });
+    console.log(`Status: ${setKeyRes2.status} (Expected: 200)`);
+    const setKeyData2 = await setKeyRes2.json();
+    if (setKeyRes2.status !== 200 || !setKeyData2.ok) {
+      throw new Error(`Test 10e failed: Expected { ok: true }, got: ${JSON.stringify(setKeyData2)}`);
+    }
+    console.log('✓ Test 10e Passed: Updated key using route alias and snake_case.');
+
+    // -----------------------------------------------------------------------
+    // Test 10f: GET /user/gemini-key alias verifying updated key
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 10f: GET /user/gemini-key alias verifying updated key ---');
+    const getKeyRes3 = await fetch(`${baseUrl}/user/gemini-key`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Status: ${getKeyRes3.status} (Expected: 200)`);
+    const getKeyData3 = await getKeyRes3.json();
+    if (getKeyRes3.status !== 200 || getKeyData3.geminiKey !== updatedApiKey) {
+      throw new Error(`Test 10f failed: Expected { geminiKey: '${updatedApiKey}' }, got: ${JSON.stringify(getKeyData3)}`);
+    }
+    console.log('✓ Test 10f Passed: Route alias correctly returns updated key.');
+
     console.log('\n======================================================');
-    console.log('🎉 ALL 9 INTEGRATION TESTS PASSED WITH 100% SUCCESS!');
+    console.log('🎉 ALL 15 INTEGRATION TESTS PASSED WITH 100% SUCCESS!');
     console.log('======================================================');
   } finally {
     server.close();

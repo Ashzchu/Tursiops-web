@@ -146,3 +146,74 @@ export async function createUser({ name = null, email, passwordHash, id = null }
     email: normalizedEmail,
   };
 }
+
+/**
+ * Retrieves a user's stored Gemini API key by user ID and/or email.
+ * @param {string} userId
+ * @param {string} [email]
+ * @returns {Promise<string|null>}
+ */
+export async function getUserGeminiKey(userId, email = null) {
+  let result;
+  const cleanEmail = email ? email.trim().toLowerCase() : null;
+
+  if (userId && cleanEmail) {
+    result = await db.execute({
+      sql: 'SELECT gemini_key FROM users WHERE id = ? OR LOWER(Email) = ? LIMIT 1',
+      args: [userId, cleanEmail],
+    });
+  } else if (userId) {
+    result = await db.execute({
+      sql: 'SELECT gemini_key FROM users WHERE id = ? LIMIT 1',
+      args: [userId],
+    });
+  } else if (cleanEmail) {
+    result = await db.execute({
+      sql: 'SELECT gemini_key FROM users WHERE LOWER(Email) = ? LIMIT 1',
+      args: [cleanEmail],
+    });
+  } else {
+    return null;
+  }
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  return result.rows[0].gemini_key ?? null;
+}
+
+/**
+ * Updates a user's stored Gemini API key by user ID and/or email.
+ * @param {string} userId
+ * @param {string|null} geminiKey
+ * @param {string} [email]
+ * @returns {Promise<boolean>}
+ */
+export async function setUserGeminiKey(userId, geminiKey, email = null) {
+  const sanitizedKey = geminiKey ? String(geminiKey).trim() : null;
+  const cleanEmail = email ? email.trim().toLowerCase() : null;
+  let result;
+
+  if (userId && cleanEmail) {
+    result = await db.execute({
+      sql: 'UPDATE users SET gemini_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? OR LOWER(Email) = ?',
+      args: [sanitizedKey, userId, cleanEmail],
+    });
+  } else if (userId) {
+    result = await db.execute({
+      sql: 'UPDATE users SET gemini_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      args: [sanitizedKey, userId],
+    });
+  } else if (cleanEmail) {
+    result = await db.execute({
+      sql: 'UPDATE users SET gemini_key = ?, updated_at = CURRENT_TIMESTAMP WHERE LOWER(Email) = ?',
+      args: [sanitizedKey, cleanEmail],
+    });
+  } else {
+    return false;
+  }
+
+  return (result.rowsAffected || 0) > 0;
+}
+
