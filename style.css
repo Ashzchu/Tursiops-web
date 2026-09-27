@@ -1246,6 +1246,24 @@ body.pixel-theme, body.dark-theme, body {
   flex-shrink: 0;
 }
 
+/* Gmail / Email pills */
+.email-badge {
+  background: #ea4335;
+  color: #ffffff;
+}
+
+.email-btn {
+  border-color: rgba(234, 67, 53, 0.3);
+  color: var(--text-secondary);
+}
+
+.email-btn:hover {
+  border-color: #ea4335;
+  color: #fca5a5;
+  background: rgba(234, 67, 53, 0.06);
+  box-shadow: 3px 3px 0px rgba(234, 67, 53, 0.4), 0 0 10px rgba(234, 67, 53, 0.15);
+}
+
 /* ==========================================================================
    FOOTER
    ========================================================================== */
