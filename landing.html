@@ -3,351 +3,412 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tursiops — VS Code Extension & Persistent Memory Manual</title>
-  <meta name="description" content="Official authorization portal, user manual, and documentation for Tursiops VS Code extension. One extension, a permanent record for every file.">
+  <title>Tursiops v2.2 — Website Content & VS Code Extension Portal</title>
+  <meta name="description" content="Tursiops v2.2: Set up once, then it runs quietly alongside your agent. Full prompt memory, navigator, change summary, and MiniGit powered by your Gemini key.">
   
-  <!-- Fonts: Doto (Dot-Matrix Display), Inter (Body), Fira Code (Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-theme">
-  <!-- Dynamic Ambient Backdrop Glows -->
+<body class="pixel-theme">
   <div class="ambient-glow glow-top" aria-hidden="true"></div>
   <div class="ambient-glow glow-right" aria-hidden="true"></div>
   <div class="ambient-glow glow-bottom" aria-hidden="true"></div>
   <div class="cyber-grid-overlay" aria-hidden="true"></div>
+  <div class="pixel-scanlines" aria-hidden="true"></div>
 
-  <!-- FLOATING HOVER NAVIGATION BAR (Civik-style Floating Suspended Bar) -->
+  <canvas id="pixelDispersionCanvas" class="pixel-dispersion-canvas" aria-hidden="true"></canvas>
+
+  <!-- Interactive Background Canvas (adityandt.in grid reference + Blue ASCII Cursor Trail) -->
+  <canvas id="interactive-bg" class="interactive-bg-canvas" aria-hidden="true"></canvas>
+
   <header class="floating-header-wrapper">
-    <nav class="floating-nav-bar" aria-label="Main Navigation">
-      
-      <!-- Brand Pill -->
-      <a href="#hero" class="nav-brand">
+    <nav class="floating-nav-bar" id="mainNavBar" aria-label="Main Navigation">
+      <a href="#hero" class="nav-brand" id="navBrandLink">
         <span class="brand-glyph">🐬</span>
-        <span class="brand-name doto-font">TURSIOPS</span>
+        <span class="brand-name">TURSIOPS</span>
+        <span class="nav-version-badge">v2.2</span>
         <span class="nav-status-dot" title="Extension Auth Active"></span>
       </a>
 
-      <!-- Navigation Links -->
-      <div class="nav-menu-links">
-        <a href="#how-it-works" class="nav-item doto-font active">HOW IT WORKS</a>
-        <a href="#features" class="nav-item doto-font">FEATURES</a>
-        <a href="#security" class="nav-item doto-font">SECURITY</a>
-        <a href="#manual" class="nav-item doto-font">USER MANUAL</a>
+      <div class="nav-menu-links" id="navMenuLinks">
+        <a href="#how-it-works" class="nav-item active" data-section="how-it-works"><span>HOW IT WORKS</span></a>
+        <a href="#features" class="nav-item" data-section="features"><span>FEATURES</span></a>
+        <a href="#security" class="nav-item" data-section="security"><span>SECURITY</span></a>
+        <a href="#manual" class="nav-item" data-section="manual"><span>USER MANUAL</span></a>
       </div>
 
-      <!-- Action Button -->
       <div class="nav-actions" id="navAuthActions">
-        <a href="/signin" class="nav-btn-auth doto-font" style="text-decoration:none;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <span>AUTHORIZE EXTENSION</span>
+        <a href="/signin" class="nav-btn-auth btn-pixel-disperse" style="text-decoration:none;">
+          <span class="btn-inner">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>AUTHORIZE EXTENSION</span>
+          </span>
         </a>
       </div>
-
     </nav>
   </header>
 
-  <!-- MAIN PAGE CONTENT -->
   <main class="main-container">
-
-    <!-- 1. HERO & EXTENSION OVERVIEW SECTION -->
+    <!-- HERO -->
     <section class="hero-section" id="hero">
-      <div class="hero-badge doto-font">
-        <span class="badge-dot"></span> VS CODE EXTENSION PORTAL v1.2.0
+      <div class="hero-badge pixel-badge">
+        <span class="badge-dot"></span> VS CODE EXTENSION PORTAL v2.2
       </div>
 
-      <h1 class="hero-title doto-font">
-        ONE EXTENSION.<br>
-        <span class="gradient-text">A PERMANENT RECORD FOR EVERY FILE.</span>
+      <h1 class="hero-title">
+        <span class="brand-hero-title">TURSIOPS</span>
+        <span class="hero-subheading-tag">WEBSITE CONTENT</span>
       </h1>
 
       <p class="hero-subtext">
-        Tursiops gives Copilot, IBM Bob, and any AI coding agent an unshakeable, persistent file-specific memory layer — stored locally on your machine.
+        Set up once, then it runs quietly alongside your agent.
       </p>
 
       <div class="hero-cta-group">
-        <a href="/signin" class="btn btn-primary btn-hero doto-font">
-          AUTHORIZE VS CODE &rarr;
+        <a href="/signin" class="btn btn-primary btn-hero btn-pixel-disperse" id="btnHeroAuth">
+          <span class="btn-inner">AUTHORIZE VS CODE &rarr;</span>
         </a>
-        <a href="#manual" class="btn btn-secondary btn-hero doto-font">
-          OPEN USER MANUAL
+        <a href="#manual" class="btn btn-secondary btn-hero btn-pixel-disperse" id="btnHeroManual">
+          <span class="btn-inner">OPEN USER MANUAL</span>
         </a>
+      </div>
+
+      <!-- Left-Aligned Quick Repository & Marketplace Links -->
+      <div class="hero-links-shelf">
+        <div class="shelf-tag">// PLUGIN MARKETPLACE & REPOSITORIES</div>
+        <div class="shelf-buttons">
+          <a href="https://marketplace.visualstudio.com/items?itemName=Conquestcore.tursiops-ai" target="_blank" rel="noopener noreferrer" class="shelf-btn marketplace-shelf-btn">
+            <span class="btn-icon">⚡</span>
+            <div class="btn-info">
+              <span class="btn-title">VS CODE MARKETPLACE</span>
+              <span class="btn-subtitle">Plugin Marketplace Link</span>
+            </div>
+            <span class="btn-arrow">&nearr;</span>
+          </a>
+
+          <a href="https://github.com/Ashzchu/tursiops" target="_blank" rel="noopener noreferrer" class="shelf-btn repo-shelf-btn">
+            <span class="btn-icon">📦</span>
+            <div class="btn-info">
+              <span class="btn-title">GITHUB: TURSIOPS</span>
+              <span class="btn-subtitle">Extension / Plugin</span>
+            </div>
+            <span class="btn-arrow">&nearr;</span>
+          </a>
+
+          <a href="https://github.com/Ashzchu/tursiops-web" target="_blank" rel="noopener noreferrer" class="shelf-btn repo-shelf-btn">
+            <span class="btn-icon">🌐</span>
+            <div class="btn-info">
+              <span class="btn-title">GITHUB: TURSIOPS-WEB</span>
+              <span class="btn-subtitle">Website Repository</span>
+            </div>
+            <span class="btn-arrow">&nearr;</span>
+          </a>
+        </div>
       </div>
     </section>
 
-    <!-- 2. HOW IT WORKS SECTION -->
+
+    <!-- HOW IT WORKS -->
     <section class="content-section" id="how-it-works">
-      <div class="section-tag doto-font">// WORKFLOW ARCHITECTURE</div>
-      <h2 class="section-heading doto-font">HOW IT WORKS</h2>
-      <p class="section-subheading">One extension. A permanent record for every file.</p>
+      <div class="section-tag">// WORKFLOW ARCHITECTURE</div>
+      <h2 class="section-heading">HOW IT WORKS</h2>
+      <p class="section-subheading">Set up once, then it runs quietly alongside your agent.</p>
 
-      <div class="steps-grid">
-        <!-- Step 1 -->
-        <div class="step-card">
-          <div class="step-number doto-font">01</div>
-          <h3 class="step-title doto-font">You work as usual</h3>
+      <ul class="card-list how-it-works-cards">
+        <li class="card-item step-card">
+          <div class="step-card-header">
+            <span class="step-number">01</span>
+            <span class="step-status-chip">AUTH_FLOW</span>
+          </div>
+          <h3 class="step-title">Sign in, once</h3>
           <p class="step-desc">
-            Tell your agent — Copilot, IBM Bob, whatever you use — what to do. Nothing about your workflow changes.
+            Open the extension &rarr; sign in or sign up &rarr; you're sent to the website in your browser &rarr; after authenticating, you're sent straight back to VS Code, signed in. Same flow as Cursor or CodeRabbit.
           </p>
-        </div>
+        </li>
 
-        <!-- Step 2 -->
-        <div class="step-card">
-          <div class="step-number doto-font">02</div>
-          <h3 class="step-title doto-font">Tursiops remembers</h3>
+        <li class="card-item step-card">
+          <div class="step-card-header">
+            <span class="step-number">02</span>
+            <span class="step-status-chip">API_KEY</span>
+          </div>
+          <h3 class="step-title">Add your Gemini key</h3>
           <p class="step-desc">
-            The prompt, the diff, the decision behind it, and the validation result get attached to that exact file.
+            Paste in your own Gemini API key. Every refine, summary, and navigation from here on runs on that key &mdash; nothing else powers the model.
           </p>
-        </div>
+        </li>
 
-        <!-- Step 3 -->
-        <div class="step-card">
-          <div class="step-number doto-font">03</div>
-          <h3 class="step-title doto-font">It’s there next time</h3>
+        <li class="card-item step-card">
+          <div class="step-card-header">
+            <span class="step-number">03</span>
+            <span class="step-status-chip">AGENT_PROMPT</span>
+          </div>
+          <h3 class="step-title">Then you just code</h3>
           <p class="step-desc">
-            Restart VS Code, come back in a month — run one command and the full history is right there.
+            You prompt your agent &mdash; IBM Bob, Antigravity, whatever you use &mdash; like always. Tursiops saves that prompt, refines it with Gemini into a short, clean version, and stores it.
           </p>
-        </div>
-      </div>
+        </li>
 
-      <!-- Live Code & Command Inspector Box -->
-      <div class="command-box">
+        <li class="card-item step-card">
+          <div class="step-card-header">
+            <span class="step-number">04</span>
+            <span class="step-status-chip">RECALL_LOOP</span>
+          </div>
+          <h3 class="step-title">Next prompt, full context back</h3>
+          <p class="step-desc">
+            Before your agent builds the next thing, Tursiops forces it to read the refined file first &mdash; so it works with everything it's already done, instead of the last message or two it actually remembers.
+          </p>
+        </li>
+      </ul>
+
+      <div class="prompt-flow-card pixel-box">
         <div class="command-box-header">
           <div class="terminal-dots">
             <span class="dot dot-red"></span>
             <span class="dot dot-yellow"></span>
             <span class="dot dot-green"></span>
           </div>
-          <span class="command-box-title doto-font">TURSIOPS MEMORY RECALL IN ACTION</span>
+          <span class="command-box-title">// CONTEXT REFINEMENT CYCLE</span>
         </div>
 
-        <div class="command-box-body">
-          <div class="code-line"><span class="c-prompt">You run:</span> <code class="c-cmd doto-font">Tursiops: Show File Memory</code></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Prompt:</span> <span class="c-val">"Add JWT validation and fix the refresh token expiry"</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Change:</span> <span class="c-val">JWT middleware added &mdash; used jsonwebtoken library</span></div>
-          <div class="code-line"><span class="c-arrow">&rarr;</span> <span class="c-key">Validation:</span> <span class="c-success doto-font">Type-check passed</span></div>
+        <div class="flow-table-content">
+          <div class="flow-row">
+            <span class="flow-prompt-id">Prompt 1</span>
+            <span class="flow-arrow">&rarr;</span>
+            <span class="flow-desc">saved, refined by Gemini</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-prompt-id">Prompt 2</span>
+            <span class="flow-arrow">&rarr;</span>
+            <span class="flow-desc">agent reads refined file first &rarr; builds with full context</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-prompt-id">Prompt 3</span>
+            <span class="flow-arrow">&rarr;</span>
+            <span class="flow-desc">same again, every time</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. FEATURES SECTION -->
+    <!-- FEATURES -->
     <section class="content-section" id="features">
-      <div class="section-tag doto-font">// CAPABILITIES</div>
-      <h2 class="section-heading doto-font">FEATURES</h2>
-      <p class="section-subheading">Everything your agent should already remember</p>
+      <div class="section-tag">// FOUR FUNCTIONS, ONE PANEL</div>
+      <h2 class="section-heading">FEATURES</h2>
+      <p class="section-subheading">Four functions, one panel — each powered entirely by your own Gemini API key.</p>
 
-      <div class="features-grid">
-        <!-- Feature 1 -->
-        <div class="feature-card">
-          <div class="feature-icon">📁</div>
-          <h3 class="feature-title doto-font">File-specific memory</h3>
+      <ul class="card-list features-cards">
+        <li class="card-item feature-card">
+          <div class="feature-icon-badge">🧠 01</div>
+          <h3 class="feature-title">1. Prompt Memory</h3>
           <p class="feature-text">
-            Each file keeps a completely separate history — memory follows the file, not a chat window.
+            AI agents lose context after 2–3 prompts. Prompt Memory stops that: every prompt you give your agent is saved to a file, refined into a clean, concise version by Gemini, and your agent is forced to read that file before building the next thing — so it always has full context, not a fading memory of the last message or two.
           </p>
-        </div>
+        </li>
 
-        <!-- Feature 2 -->
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3 class="feature-title doto-font">AI-powered changes</h3>
+        <li class="card-item feature-card">
+          <div class="feature-icon-badge">🧭 02</div>
+          <h3 class="feature-title">2. Navigator</h3>
           <p class="feature-text">
-            Ask Tursiops to make a change directly; every proposal comes with a diff before anything is written.
+            Move through your project's files — check something, compare a file, look something up — without disturbing your main agent's active session or context. Browsing never resets or interrupts the work in progress.
           </p>
-        </div>
+        </li>
 
-        <!-- Feature 3 -->
-        <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3 class="feature-title doto-font">Auto-validation</h3>
+        <li class="card-item feature-card">
+          <div class="feature-icon-badge">📋 03</div>
+          <h3 class="feature-title">3. Change Summary</h3>
           <p class="feature-text">
-            Type-check and lint run automatically after every approved change, with up to 3 self-correction attempts.
+            Every single prompt's changes are recorded, not just the ones that make it into a git commit. Ask for a summary anytime and get a plain-language account of what actually changed and why — without digging through diffs yourself.
           </p>
-        </div>
+        </li>
 
-        <!-- Feature 4 -->
-        <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3 class="feature-title doto-font">Local summarization</h3>
+        <li class="card-item feature-card">
+          <div class="feature-icon-badge">📦 04</div>
+          <h3 class="feature-title">4. MiniGit</h3>
           <p class="feature-text">
-            File summaries run on a local model — routine work costs nothing and stays private.
+            Real commits usually bundle 2–3 prompts' worth of changes, so a bad AI edit inside that window isn't its own commit — you can't just revert it. MiniGit checkpoints every prompt's change in between commits, so if the AI does something you didn't want, you can retrieve that exact prompt's state back, even without a commit to roll back to.
           </p>
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
 
-    <!-- 4. SECURITY SECTION -->
+    <!-- SECURITY -->
     <section class="content-section" id="security">
-      <div class="section-tag doto-font">// ZERO TRUST POLICY</div>
-      <h2 class="section-heading doto-font">SECURITY</h2>
-      <p class="section-subheading">Built local-first, on purpose</p>
+      <div class="section-tag">// ZERO TRUST POLICY</div>
+      <h2 class="section-heading">SECURITY</h2>
+      <p class="section-subheading">Local by design — nothing leaves your machine unless you choose.</p>
 
-      <div class="security-list-card">
+      <div class="security-banner-note pixel-box">
+        <span class="banner-pill">KEY PROTECTION</span>
+        <span class="banner-text">Only your own Gemini key does the work — everything else stays local.</span>
+      </div>
+
+      <div class="security-list-card pixel-box">
         <div class="sec-row">
-          <div class="sec-badge doto-font">01</div>
+          <div class="sec-badge">01</div>
           <div class="sec-content">
-            <strong class="doto-font">No cloud account, no user database, no telemetry.</strong>
-            <span>Memory lives in your project folder.</span>
+            <h3 class="sec-title">Sign-in doesn't give us your data</h3>
+            <p class="sec-desc">
+              Authentication happens through your browser, the same pattern Cursor and CodeRabbit use — you sign in on the website, it redirects back to VS Code with just a confirmation. Tursiops never sees your website password; it only knows you're signed in.
+            </p>
           </div>
         </div>
 
         <div class="sec-row">
-          <div class="sec-badge doto-font">02</div>
+          <div class="sec-badge">02</div>
           <div class="sec-content">
-            <strong class="doto-font">Your API key stays in your OS keychain.</strong>
-            <span>Never in source, settings, or logs.</span>
+            <h3 class="sec-title">Your Gemini key is yours alone</h3>
+            <p class="sec-desc">
+              You generate it, you paste it in, and it's stored in VS Code's SecretStorage — backed by your OS's secure keychain, never written to source, settings, or logs. Every refine, summary, and navigation call runs on your key, not a shared one.
+            </p>
           </div>
         </div>
 
         <div class="sec-row">
-          <div class="sec-badge doto-font">03</div>
+          <div class="sec-badge">03</div>
           <div class="sec-content">
-            <strong class="doto-font">Secret files are filtered automatically.</strong>
-            <span><code>.env</code>, <code>.pem</code>, <code>id_rsa</code> never reach any AI model.</span>
+            <h3 class="sec-title">Secrets never reach Gemini</h3>
+            <p class="sec-desc">
+              Before any file content is sent for refining or summarizing, Tursiops automatically excludes <code>.env</code> files and variants, private keys (<code>id_rsa</code>, <code>id_ed25519</code>), <code>credentials.json</code>, <code>.netrc</code>/<code>.npmrc</code>/<code>.pypirc</code>, and certificate/keystore files (<code>.pem</code>, <code>.key</code>, <code>.p12</code>, <code>.pfx</code>, <code>.crt</code>, <code>.jks</code>) — along with anything in <code>node_modules</code>.
+            </p>
           </div>
         </div>
 
         <div class="sec-row">
-          <div class="sec-badge doto-font">04</div>
+          <div class="sec-badge">04</div>
           <div class="sec-content">
-            <strong class="doto-font">Every AI change is a diff you approve.</strong>
-            <span>Nothing is written silently.</span>
+            <h3 class="sec-title">Untrusted workspaces are locked down</h3>
+            <p class="sec-desc">
+              Open a workspace VS Code hasn't marked as trusted, and Tursiops disables itself automatically — no file read, no prompt sent, no risk taken.
+            </p>
+          </div>
+        </div>
+
+        <div class="sec-row">
+          <div class="sec-badge">05</div>
+          <div class="sec-content">
+            <h3 class="sec-title">MiniGit snapshots stay local</h3>
+            <p class="sec-desc">
+              Per-prompt checkpoints between commits are stored on your machine only — they're for your own rollback, never transmitted anywhere.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 5. USER MANUAL SECTION & INTERACTIVE COMMANDS GUIDE -->
+    <!-- USER MANUAL -->
     <section class="content-section" id="manual">
-      <div class="section-tag doto-font">// EXTENSION COMMAND GUIDE</div>
-      <h2 class="section-heading doto-font">USER MANUAL</h2>
-      <p class="section-subheading">Command Palette & Extension Usage Guide for VS Code</p>
+      <div class="section-tag">// OPERATIONAL RUNBOOK</div>
+      <h2 class="section-heading">USER MANUAL</h2>
+      <p class="section-subheading">Set up once — then it runs alongside your normal coding, no habit changes required.</p>
 
-      <div class="manual-container">
-        <!-- Interactive Command Tabs -->
-        <div class="manual-tabs">
-          <button type="button" class="manual-tab-btn active doto-font" id="mTab1">Tursiops: Show File Memory</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab2">Tursiops: Remember Prompt</button>
-          <button type="button" class="manual-tab-btn doto-font" id="mTab3">Tursiops: Inspect Diff</button>
+      <div class="manual-layout-grid">
+        <div class="manual-card-box pixel-box">
+          <div class="box-header-title">
+            <span class="box-num-badge">A</span>
+            <h3>GETTING STARTED</h3>
+          </div>
+          <ol class="manual-ordered-steps">
+            <li>
+              <span class="step-bullet">1.</span>
+              <div class="bullet-content">
+                <strong>Install Tursiops from the VS Code Marketplace</strong> &mdash; it appears in your side panel.
+              </div>
+            </li>
+            <li>
+              <span class="step-bullet">2.</span>
+              <div class="bullet-content">
+                <strong>Sign in or sign up from the panel</strong> &rarr; you're redirected to the browser to authenticate &rarr; you're sent straight back to VS Code, signed in.
+              </div>
+            </li>
+            <li>
+              <span class="step-bullet">3.</span>
+              <div class="bullet-content">
+                <strong>Paste in your own Gemini API key when prompted.</strong> This key powers every refine, summary, and navigation call &mdash; nothing works without it.
+              </div>
+            </li>
+          </ol>
         </div>
 
-        <!-- Command Detail View -->
-        <div class="manual-detail-card" id="manualDetailContent">
-          <div class="manual-detail-header">
-            <h4 class="manual-cmd-name doto-font" id="cmdName">Tursiops: Show File Memory</h4>
-            <span class="manual-shortcut doto-font">Ctrl+Alt+M / Cmd+Alt+M</span>
+        <div class="manual-card-box pixel-box">
+          <div class="box-header-title">
+            <span class="box-num-badge">B</span>
+            <h3>YOUR DAILY FLOW — NOTHING CHANGES ABOUT HOW YOU CODE</h3>
           </div>
-
-          <p class="manual-cmd-desc" id="cmdDesc">
-            Retrieves and displays the full architectural decision log, prompt history, diff changes, and type validation records associated with the currently open file in VS Code.
+          <p class="flow-statement">
+            Keep prompting your agent — IBM Bob, Antigravity, whatever you use — exactly as before. Tursiops runs quietly underneath: saving each prompt, refining it with Gemini, and feeding that context back to your agent before its next build. You don't have to do anything extra for this part.
           </p>
+        </div>
+      </div>
 
-          <div class="manual-example-box">
-            <div class="box-title doto-font">// COMMAND PALETTE SYNTAX</div>
-            <pre class="box-code" id="cmdSyntax"><code>Press Ctrl+Shift+P -> Type "Tursiops: Show File Memory" -> Select active file</code></pre>
-          </div>
+      <div class="functions-matrix-box pixel-box">
+        <div class="matrix-header">
+          <span class="matrix-icon">⚡</span>
+          <h3 class="matrix-title">USING THE FOUR FUNCTIONS</h3>
+        </div>
+
+        <div class="table-responsive">
+          <table class="pixel-matrix-table">
+            <thead>
+              <tr>
+                <th scope="col" class="th-func">FUNCTION</th>
+                <th scope="col" class="th-what">WHAT IT'S FOR</th>
+                <th scope="col" class="th-when">WHEN TO REACH FOR IT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-func"><span class="func-pill">Prompt Memory</span></td>
+                <td class="td-what">See every prompt you've given, refined and organized, with a Remember/Forget switch</td>
+                <td class="td-when">Check what context your agent is actually working from</td>
+              </tr>
+              <tr>
+                <td class="td-func"><span class="func-pill">Navigator</span></td>
+                <td class="td-what">Browse and check files without disturbing your agent's active session</td>
+                <td class="td-when">Looking something up mid-task without breaking flow</td>
+              </tr>
+              <tr>
+                <td class="td-func"><span class="func-pill">Change Summary</span></td>
+                <td class="td-what">Plain-language summary of what changed after any prompt</td>
+                <td class="td-when">Understand a change without reading the raw diff</td>
+              </tr>
+              <tr>
+                <td class="td-func"><span class="func-pill">MiniGit</span></td>
+                <td class="td-what">Retrieve the state from any single prompt between commits</td>
+                <td class="td-when">The agent made a change you didn't want, and it's not its own commit</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="habit-matters-banner pixel-box">
+        <div class="habit-icon">🐬</div>
+        <div class="habit-content">
+          <h3 class="habit-title">THE ONE HABIT THAT MATTERS</h3>
+          <p class="habit-text">
+            Just keep prompting your agent normally &mdash; Tursiops does the saving and refining on its own. The only manual step is the one-time sign-in and API key setup; everything after that is automatic.
+          </p>
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
-      <div class="footer-brand doto-font">🐬 TURSIOPS EXTENSION PORTAL</div>
+      <div class="footer-brand">🐬 TURSIOPS EXTENSION PORTAL v2.2</div>
       <div class="footer-meta">
-        Source on GitHub &bull; Requires VS Code 1.138.0+ &bull; Built Local-First
+        Set up once, then it runs quietly alongside your agent &bull; Built Local-First &bull; Turso libSQL
       </div>
     </div>
   </footer>
 
-  <!-- EXTENSION AUTHORIZATION MODAL -->
-  <div class="modal-overlay" id="authModal" aria-hidden="true">
-    <div class="modal-card">
-      <button class="modal-close-btn" id="btnCloseModal" aria-label="Close dialog">&times;</button>
-
-      <div class="modal-brand">
-        <span class="modal-glyph">🐬</span>
-        <h3 class="modal-title doto-font" id="modalHeading">AUTHORIZE VS CODE EXTENSION</h3>
-      </div>
-
-      <div class="micro-copy-notice doto-font">
-        &gt; Signing in from the Tursiops extension. You’ll be sent back to VS Code once you continue.
-      </div>
-
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab-btn active doto-font" id="modalTabSignIn">SIGN IN</button>
-        <button type="button" class="auth-tab-btn doto-font" id="modalTabSignUp">CREATE ACCOUNT</button>
-      </div>
-
-      <!-- Deep link notification banner if redirect_uri is in URL -->
-      <div class="deep-link-banner doto-font" id="deepLinkBanner" style="display: none;">
-        <span>VS Code Callback Target: </span><span id="deepLinkTarget"></span>
-      </div>
-
-      <!-- Error / Success Alert -->
-      <div class="auth-alert-box" id="authAlertBox"></div>
-
-      <!-- Form -->
-      <form id="popupAuthForm" autocomplete="on">
-        <div id="modalActiveSessionContainer"></div>
-
-        <div id="modalCredentialsArea">
-          <div class="form-group" id="groupName" style="display: none;">
-            <label for="modalName" class="doto-font">Developer Name</label>
-            <input type="text" id="modalName" class="form-input" placeholder="Ashzchu" autocomplete="name">
-          </div>
-
-          <div class="form-group">
-            <label for="modalEmail" class="doto-font">Developer Email</label>
-            <input type="email" id="modalEmail" class="form-input" placeholder="developer@domain.com" required autocomplete="email">
-          </div>
-
-          <div class="form-group">
-            <label for="modalPassword" id="labelModalPassword" class="doto-font">Password / Vault Key</label>
-            <input type="password" id="modalPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
-          </div>
-
-          <div class="form-group" id="groupConfirmPassword" style="display: none;">
-            <label for="modalConfirmPassword" class="doto-font">Confirm Password</label>
-            <input type="password" id="modalConfirmPassword" class="form-input" placeholder="••••••••••••" autocomplete="new-password">
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block doto-font" id="btnModalSubmit">
-            <span id="modalSpinner" style="display: none;">⏳ </span>
-            <span id="modalSubmitText">SIGN IN</span>
-          </button>
-        </div>
-      </form>
-
-      <!-- Separate VS Code Integration Button -->
-      <div class="auth-action-divider doto-font">
-        <span>VS CODE EXTENSION ACTION</span>
-      </div>
-
-      <a href="#" class="btn btn-block btn-open-vscode locked doto-font" id="btnModalOpenVsCode" aria-disabled="true" role="button">
-        <span class="btn-icon" id="modalVsCodeIcon">🔒</span>
-        <span class="btn-label" id="modalVsCodeLabel">OPEN IN VS CODE (SIGN IN FIRST)</span>
-      </a>
-      <div class="vscode-unlock-hint doto-font" id="modalUnlockHint">
-        &gt; Complete sign in above to unlock VS Code integration.
-      </div>
-
-      <div class="trust-line-notice doto-font">
-        &gt; Your data stays local. This sign-in is only for AI-assisted changes — no cloud account otherwise.
-      </div>
-    </div>
-  </div>
-
-  <!-- Notification Toast -->
-  <div class="toast doto-font" id="toast" role="status" aria-live="polite"></div>
-
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
 </html>
